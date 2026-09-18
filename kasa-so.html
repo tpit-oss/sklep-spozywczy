@@ -6,19 +6,19 @@
 <title>Kasa Samoobsługowa</title>
 <style>
   :root {
-    --bg: #1a1e2e;
-    --surface: #20253a;
-    --surface2: #2a304a;
-    --surface3: #323858;
-    --accent: #0066ff;
-    --accent2: #0052cc;
-    --green: #00b341;
-    --red: #e53935;
-    --yellow: #ffb300;
-    --text: #ffffff;
-    --text2: #9bacc8;
-    --border: #3a4268;
-    --receipt-bg: #f5f5f0;
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface2: #f8f9fb;
+    --surface3: #eef1f5;
+    --accent: #0057b8;
+    --accent2: #00458f;
+    --green: #008f3d;
+    --red: #d92d2d;
+    --yellow: #e39b00;
+    --text: #17202a;
+    --text2: #687585;
+    --border: #dfe4ea;
+    --receipt-bg: #ffffff;
     --radius: 12px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -27,7 +27,7 @@
 
   /* ── TOP BAR ── */
   .topbar {
-    background: #0d1018;
+    background: #ffffff;
     padding: 10px 20px;
     display: flex;
     align-items: center;
@@ -37,7 +37,7 @@
   }
   .topbar-logo { display:flex;align-items:center;gap:10px; }
   .topbar-logo img { width:32px;height:32px; }
-  .topbar-logo h1 { font-size:16px;font-weight:700;letter-spacing:.5px; }
+  .topbar-logo h1 { font-size:18px;font-weight:700;letter-spacing:.5px; }
   .topbar-logo span { font-size:11px;color:var(--text2);display:block; }
   .topbar-info { text-align:right; }
   .topbar-time { font-size:22px;font-weight:700;font-variant-numeric:tabular-nums; }
@@ -51,7 +51,7 @@
   .receipt-panel {
     width: 340px;
     background: var(--surface);
-    border-right: 1px solid var(--border);
+    border-left: 1px solid var(--border);border-right:0;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -85,10 +85,10 @@
   .item-info { flex:1;min-width:0; }
   .item-name { font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
   .item-sub { font-size:11px;color:var(--text2);margin-top:1px; }
-  .item-price { font-size:14px;font-weight:700;color:#fff;flex-shrink:0; }
+  .item-price { font-size:14px;font-weight:700;color:var(--text);flex-shrink:0; }
   .item-qty-ctrl { display:flex;align-items:center;gap:4px; }
   .qty-btn { width:24px;height:24px;border-radius:6px;border:none;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center; }
-  .qty-minus { background:#3a4268;color:#fff; }
+  .qty-minus { background:#3a4268;color:var(--text); }
   .qty-plus { background:var(--accent);color:#fff; }
   .qty-val { font-size:13px;font-weight:700;min-width:20px;text-align:center; }
 
@@ -128,8 +128,8 @@
   .scanner-icon { position:absolute;left:12px;font-size:18px; }
   #barcode-input {
     width:100%;padding:12px 12px 12px 42px;
-    background:var(--bg);border:2px solid var(--accent);
-    border-radius:10px;color:#fff;font-size:16px;
+    background:#fff;border:2px solid var(--accent);
+    border-radius:10px;color:var(--text);font-size:16px;
     outline:none;caret-color:var(--accent);
   }
   #barcode-input::placeholder { color:var(--text2); }
@@ -137,7 +137,8 @@
   .scan-btn:active { background:var(--accent2); }
 
   /* CATEGORY PILLS */
-  .cat-bar {
+  .cat-bar { display:none; /* wybór produktów wyłączony — kasa wymaga kodu */
+
     padding: 10px 14px;
     display: flex;
     gap: 8px;
@@ -158,10 +159,10 @@
     color: var(--text2);
     transition: .15s;
   }
-  .cat-pill.active { background:var(--accent);border-color:var(--accent);color:#fff; }
+  .cat-pill.active { background:var(--accent);border-color:var(--accent);color:var(--text); }
 
   /* PRODUCT GRID */
-  .product-grid-wrap { flex:1;overflow-y:auto;padding:12px; }
+  .product-grid-wrap { flex:1;overflow-y:auto;padding:12px;display:none; }
   .product-grid-wrap::-webkit-scrollbar { width:4px; }
   .product-grid-wrap::-webkit-scrollbar-thumb { background:var(--border);border-radius:2px; }
   .product-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
@@ -182,7 +183,7 @@
   .product-card:hover { border-color:var(--accent); }
   .product-card.out { opacity:.45;cursor:not-allowed; }
   .product-emoji { font-size:28px;margin-bottom:6px; }
-  .product-name { font-size:11px;font-weight:600;line-height:1.3;margin-bottom:6px;color:#fff; }
+  .product-name { font-size:11px;font-weight:600;line-height:1.3;margin-bottom:6px;color:var(--text); }
   .product-price { font-size:15px;font-weight:800;color:#4df08a; }
   .product-unit { font-size:10px;color:var(--text2); }
   .product-badge { position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:700; }
@@ -222,9 +223,9 @@
   .pay-method-sub { font-size:10px;color:var(--text2);margin-top:2px; }
 
   .coupon-row { display:flex;gap:8px;margin-bottom:16px; }
-  .coupon-row input { flex:1;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:12px;outline:none; }
+  .coupon-row input { flex:1;padding:9px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;outline:none; }
   .coupon-row input:focus { border-color:var(--accent); }
-  .coupon-btn { padding:9px 12px;background:var(--surface3);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer; }
+  .coupon-btn { padding:9px 12px;background:var(--surface3);border:none;border-radius:8px;color:var(--text);font-size:12px;font-weight:700;cursor:pointer; }
 
   .pay-total-box { background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center; }
   .pay-total-label { font-size:11px;color:var(--text2); }
@@ -251,7 +252,7 @@
   }
   .overlay.show { display:flex; }
   .dialog {
-    background:var(--surface);border:1px solid var(--border);border-radius:20px;
+    background:#fff;border:1px solid var(--border);border-radius:20px;
     padding:36px;max-width:420px;width:92%;text-align:center;animation:popIn .25s ease;
   }
   @keyframes popIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
@@ -262,7 +263,14 @@
   .dialog-btns { display:flex;flex-direction:column;gap:10px;margin-top:24px; }
   .dialog-btn { padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:.15s; }
   .dialog-btn-primary { background:var(--green);color:#fff; }
-  .dialog-btn-secondary { background:var(--surface2);color:#fff;border:1px solid var(--border); }
+  .dialog-btn-secondary { background:var(--surface2);color:var(--text);border:1px solid var(--border); }
+  .payment-choice-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px; }
+  .payment-choice { background:#fff;border:2px solid var(--border);border-radius:12px;padding:14px 8px;cursor:pointer;color:var(--text); }
+  .payment-choice:hover { border-color:var(--accent);background:#f5f8fc; }
+  .payment-choice span { display:block;font-size:28px;margin-bottom:6px; }
+  .payment-choice b { display:block;font-size:12px; }
+  .payment-choice small { display:block;color:var(--text2);font-size:9px;margin-top:3px; }
+
 
   /* NUMPAD overlay */
   .numpad-overlay {
@@ -275,23 +283,38 @@
     padding:20px;width:100%;max-width:400px;border-radius:20px 20px 0 0;
   }
   .numpad h3 { font-size:14px;font-weight:700;margin-bottom:12px;text-align:center;color:var(--text2); }
-  .numpad-display { background:var(--bg);border:2px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:22px;font-weight:700;text-align:right;margin-bottom:14px;min-height:50px; }
+  .numpad-display { background:#fff;border:2px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:22px;font-weight:700;text-align:right;margin-bottom:14px;min-height:50px; }
   .numpad-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
   .num-btn {
     padding:18px;border-radius:10px;font-size:18px;font-weight:700;
-    border:none;cursor:pointer;background:var(--surface2);color:#fff;transition:.1s;
+    border:none;cursor:pointer;background:var(--surface2);color:var(--text);transition:.1s;
   }
   .num-btn:active { background:var(--surface3);transform:scale(.95); }
   .num-btn.action { background:var(--accent);color:#fff; }
-  .num-btn.danger { background:var(--red);color:#fff; }
+  .num-btn.danger { background:var(--red);color:var(--text); }
 
   /* TOPBAR STATUS LIGHTS */
   .status-dot { width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px; }
 
   /* SCAN FEEDBACK */
   .scan-feedback { padding:4px 12px;font-size:12px;color:var(--text2);text-align:center;min-height:22px; }
-  .scan-feedback.ok { color:#4df08a; }
+  .scan-feedback.ok { color:var(--green); }
   .scan-feedback.err { color:var(--red); }
+
+  .quick-pay {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    padding:12px 16px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+  }
+  .quick-pay-info { display:flex;align-items:baseline;gap:12px; }
+  .quick-pay-info span { font-size:12px;color:var(--text2); }
+  .quick-pay-info strong { font-size:22px;color:var(--text); }
+  .quick-pay .btn-pay { width:auto;min-width:180px;padding:13px 24px; }
+
 
   /* RECEIPT PRINT MODAL */
   .print-receipt { background:#fff;color:#000;font-family:'Courier New',monospace;font-size:12px;padding:20px;border-radius:8px;max-width:300px;width:100%;line-height:1.7; }
@@ -355,7 +378,15 @@
       </div>
       <button class="scan-btn" onclick="scanBarcode()">DODAJ</button>
     </div>
-    <div class="scan-feedback" id="scan-feedback">Gotowy do skanowania</div>
+    <div class="scan-feedback" id="scan-feedback">Wpisz lub zeskanuj kod produktu</div>
+
+    <div class="quick-pay">
+      <div class="quick-pay-info">
+        <span>Do zapłaty</span>
+        <strong id="quick-pay-total">0,00 zł</strong>
+      </div>
+      <button class="btn-pay" id="btn-pay" onclick="startPayment()" disabled>ZAPŁAĆ</button>
+    </div>
 
     <!-- CATEGORY PILLS -->
     <div class="cat-bar" id="cat-bar">
@@ -368,42 +399,7 @@
     </div>
   </div>
 
-  <!-- RIGHT: PAY -->
-  <div class="pay-panel">
-    <div class="pay-header">💳 Płatność</div>
-    <div class="pay-body">
-      <div class="pay-total-box">
-        <div class="pay-total-label">DO ZAPŁATY</div>
-        <div class="pay-total-amount" id="pay-total">0,00 zł</div>
-      </div>
 
-      <div class="pay-methods">
-        <div class="pay-method selected" onclick="selectPayment('card',this)">
-          <div class="pay-method-icon">💳</div>
-          <div class="pay-method-name">KARTA</div>
-          <div class="pay-method-sub">Płatność bezstykowa</div>
-        </div>
-        <div class="pay-method" onclick="selectPayment('cash',this)">
-          <div class="pay-method-icon">💵</div>
-          <div class="pay-method-name">GOTÓWKA</div>
-          <div class="pay-method-sub">Banknoty i monety</div>
-        </div>
-        <div class="pay-method" onclick="selectPayment('blik',this)">
-          <div class="pay-method-icon">📱</div>
-          <div class="pay-method-name">BLIK</div>
-          <div class="pay-method-sub">Kod 6-cyfrowy</div>
-        </div>
-      </div>
-
-      <div class="coupon-row">
-        <input type="text" id="coupon-input" placeholder="Kod rabatowy…" maxlength="12">
-        <button class="coupon-btn" onclick="applyCoupon()">OK</button>
-      </div>
-
-      <button class="btn-pay" id="btn-pay" onclick="startPayment()" disabled>ZAPŁAĆ</button>
-      <button class="btn-cancel" onclick="cancelTransaction()">ANULUJ TRANSAKCJĘ</button>
-    </div>
-  </div>
 
 </div>
 
@@ -613,7 +609,8 @@ function updateTotals() {
   document.getElementById('sum-vat').textContent = vatTotal.toFixed(2)+' zł';
   document.getElementById('sum-discount').textContent = `-${discount.toFixed(2)} zł`;
   document.getElementById('sum-total').textContent = fmt(total);
-  document.getElementById('pay-total').textContent = fmt(total);
+  if (document.getElementById('pay-total')) document.getElementById('pay-total').textContent = fmt(total);
+  document.getElementById('quick-pay-total').textContent = fmt(total);
   document.getElementById('btn-pay').disabled = cart.length === 0;
 }
 
@@ -621,8 +618,13 @@ function fmt(n) { return n.toFixed(2).replace('.', ',') + ' zł'; }
 
 // ─── SCANNER ─────────────────────────────────────────────
 function scanBarcode() {
-  const code = document.getElementById('barcode-input').value.trim();
-  if (!code) return;
+  const input = document.getElementById('barcode-input');
+  const code = input.value.trim();
+  if (!code) {
+    input.focus();
+    feedback('⚠ Wpisz lub zeskanuj kod produktu', 'err');
+    return;
+  }
   const p = products.find(x => x.barcode === code);
   if (p) {
     addToCart(p.id);
@@ -631,9 +633,14 @@ function scanBarcode() {
     feedback('✕ Nie znaleziono produktu: '+code, 'err');
   }
 }
-document.getElementById('barcode-input').addEventListener('keydown', e => {
+const barcodeInput = document.getElementById('barcode-input');
+barcodeInput.addEventListener('input', () => {
+  document.querySelector('.scan-btn').disabled = barcodeInput.value.trim() === '';
+});
+barcodeInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') scanBarcode();
 });
+
 
 function feedback(msg, cls) {
   const el = document.getElementById('scan-feedback');
@@ -665,13 +672,12 @@ function selectPayment(method, el) {
 function startPayment() {
   if (cart.length === 0) return;
   const total = getTotal();
-  if (paymentMethod === 'card') {
-    showPaymentDialog('💳','Przykładaj kartę','Przyłóż kartę lub zegarek do terminala.',total,false,false);
-  } else if (paymentMethod === 'blik') {
-    openBlik();
-  } else if (paymentMethod === 'cash') {
-    openCash();
-  }
+  showPaymentDialog('💳','Wybierz sposób płatności','Wybierz metodę płatności dla tej transakcji.',total,`
+    <div class="payment-choice-grid">
+      <button class="payment-choice" onclick="choosePayment('card')"><span>💳</span><b>Karta</b><small>Zbliżeniowo</small></button>
+      <button class="payment-choice" onclick="choosePayment('blik')"><span>📱</span><b>BLIK</b><small>Kod 6-cyfrowy</small></button>
+      <button class="payment-choice" onclick="choosePayment('cash')"><span>💵</span><b>Gotówka</b><small>Banknoty i monety</small></button>
+    </div>`,false);
 }
 
 function getTotal() {
@@ -687,6 +693,18 @@ function showPaymentDialog(icon,title,msg,total,showExtra,showBtns) {
   document.getElementById('pd-extra').innerHTML=showExtra||'';
   document.getElementById('pd-btns').style.display=showBtns===false?'none':'flex';
   document.getElementById('overlay-payment').classList.add('show');
+}
+
+function choosePayment(method) {
+  paymentMethod = method;
+  closePaymentDialog();
+  if (method === 'card') {
+    showPaymentDialog('💳','Przykładaj kartę','Przyłóż kartę lub zegarek do terminala.',getTotal(),'',true);
+  } else if (method === 'blik') {
+    openBlik();
+  } else {
+    openCash();
+  }
 }
 
 function closePaymentDialog() {
