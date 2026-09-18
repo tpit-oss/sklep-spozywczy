@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Kasa samoobsługowa</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/sql-wasm.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef1f4;font-family:Arial,sans-serif;color:#17202a}
+.app{height:100vh;display:grid;grid-template-columns:1fr 390px;gap:16px;padding:16px}.left,.right{background:#fff;border-radius:18px;box-shadow:0 4px 20px #0001}
+.left{padding:18px;overflow:auto}.right{display:flex;flex-direction:column;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.top h1{font-size:22px;margin:0}.badge{background:#e9f7ef;color:#16834b;padding:9px 12px;border-radius:20px;font-size:13px}
+.search{display:flex;gap:10px;margin-bottom:18px}.search input{flex:1;font-size:18px;padding:14px;border:1px solid #d5dae0;border-radius:10px}.search button,.pay{border:0;border-radius:10px;background:#1769ff;color:#fff;font-size:17px;padding:0 20px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.product{border:1px solid #e1e5e9;border-radius:13px;padding:15px;min-height:145px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}.product:active{transform:scale(.98)}.product h3{margin:0;font-size:17px}.price{font-size:21px;font-weight:bold}.cat{font-size:12px;color:#6b7280}
+.cart{flex:1;overflow:auto}.cart h2{margin:0 0 14px}.item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px 0;border-bottom:1px solid #eee}.qty{display:flex;align-items:center;gap:8px}.qty button{width:32px;height:32px;border:0;border-radius:7px;background:#e9edf2;font-size:18px}.total{border-top:2px solid #ddd;padding-top:16px;margin-top:10px}.line{display:flex;justify-content:space-between;margin:7px 0}.grand{font-size:28px;font-weight:bold}.pay{width:100%;height:58px;margin-top:12px}.pay:disabled{background:#aab2bd}.msg{padding:10px;background:#f3f6fa;border-radius:9px;text-align:center;margin-top:10px;font-size:14px}
+@media(max-width:850px){.app{height:auto;min-height:100vh;grid-template-columns:1fr}.right{min-height:500px}.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="left">
+ <div class="top"><h1>KASA SAMOOBSŁUGOWA</h1><span class="badge">● Gotowa</span></div>
+ <div class="search"><input id="search" placeholder="Szukaj produktu lub wpisz kod kreskowy"><button onclick="scan()">Dodaj</button></div>
+ <div id="products" class="grid"></div>
+</section>
+<aside class="right">
+ <div class="cart"><h2>Twój koszyk</h2><div id="cart"></div></div>
+ <div class="total">
+  <div class="line"><span>Produkty</span><span id="count">0</span></div>
+  <div class="line grand"><span>Razem</span><span id="sum">0,00 zł</span></div>
+  <button class="pay" id="pay" disabled onclick="checkout()">PRZEJDŹ DO PŁATNOŚCI</button>
+  <div id="msg" class="msg">Dodaj produkt, aby rozpocząć.</div>
+ </div>
+</aside>
+</div>
+<script>
+let db, products=[], cart=[];
+const money=x=>Number(x).toFixed(2).replace('.',',')+' zł';
+async function init(){
+ const SQL=await initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/'+f});
+ const saved=localStorage.getItem('kasaDB');
+ if(saved) db=new SQL.Database(Uint8Array.from(atob(saved),c=>c.charCodeAt(0)));
+ else {db=new SQL.Database(); db.run(await (await fetch('baza.sql')).text());}
+ products=db.exec('SELECT p.id,p.nazwa,p.cena,p.kod_kreskowy,k.nazwa FROM produkty p JOIN kategorie k ON k.id=p.kategoria_id ORDER BY p.id')[0].values.map(r=>({id:r[0],name:r[1],price:+r[2],code:r[3],cat:r[4]}));
+ renderProducts(products); renderCart();
+}
+function renderProducts(list){
+ document.querySelector('#products').innerHTML=list.map(p=>`<div class="product" onclick="add(${p.id})"><div><span class="cat">${p.cat}</span><h3>${p.name}</h3></div><span class="price">${money(p.price)}</span></div>`).join('')||'<p>Nie znaleziono produktu.</p>';
+}
+function add(id){let p=products.find(x=>x.id===id),i=cart.findIndex(x=>x.id===id);if(i<0)cart.push({...p,qty:1});else cart[i].qty++;renderCart();msg('Dodano do koszyka.')}
+function change(id,d){let i=cart.findIndex(x=>x.id===id);if(i<0)return;cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);renderCart()}
+function renderCart(){
+ const c=document.querySelector('#cart');
+ c.innerHTML=cart.map(p=>`<div class="item"><div><b>${p.name}</b><br><small>${money(p.price)} / szt.</small></div><div class="qty"><button onclick="change(${p.id},-1)">−</button><b>${p.qty}</b><button onclick="change(${p.id},1)">+</button></div></div>`).join('')||'<p class="msg">Koszyk jest pusty.</p>';
+ let n=cart.reduce((a,p)=>a+p.qty,0),s=cart.reduce((a,p)=>a+p.qty*p.price,0);
+ document.querySelector('#count').textContent=n;document.querySelector('#sum').textContent=money(s);document.querySelector('#pay').disabled=!n;
+}
+function scan(){let v=document.querySelector('#search').value.trim();if(!v)return;let p=products.find(x=>x.code===v||String(x.id)===v);if(p)add(p.id);else msg('Nie znaleziono produktu.');document.querySelector('#search').value=''}
+function msg(t){document.querySelector('#msg').textContent=t}
+function checkout(){
+ const total=cart.reduce((a,p)=>a+p.qty*p.price,0);
+ db.run('INSERT INTO transakcje(data,suma) VALUES(datetime("now","localtime"),?)',[total]);
+ const tx=db.export(); localStorage.setItem('kasaDB',btoa(String.fromCharCode(...tx)));
+ cart=[];renderCart();msg('Płatność zakończona. Dziękujemy za zakupy!');
+}
+document.querySelector('#search').addEventListener('keydown',e=>{if(e.key==='Enter')scan()});
+init().catch(e=>msg('Błąd bazy danych: '+e.message));
+</script>
+</body></html>
