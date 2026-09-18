@@ -41,6 +41,18 @@
   .topbar-time { font-size:22px;font-weight:700;font-variant-numeric:tabular-nums; }
   .topbar-date { font-size:11px;color:var(--text2); }
   .topbar-lane { background:var(--accent);color:#fff;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700; }
+  .btn-speech-toggle {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
   /* ── MAIN LAYOUT ── */
   .kiosk { display:flex;flex:1;overflow:hidden; }
@@ -240,7 +252,7 @@
   .print-receipt .total-row { display:flex;justify-content:space-between;font-weight:700;font-size:14px; }
 </style>
 </head>
-<body onclick="ensureFocus()">
+<body onclick="enableSpeechOnInteraction()">
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -252,6 +264,7 @@
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:14px;">
+    <button class="btn-speech-toggle" onclick="testSpeech(event)">🔊 Przetestuj głos</button>
     <span class="topbar-lane">KAS-03</span>
     <div class="topbar-info">
       <div class="topbar-time" id="clock">--:--</div>
@@ -269,7 +282,7 @@
     <!-- UKRYTE INPUT -->
     <input type="text" id="barcode-input" autocomplete="off" inputmode="numeric">
 
-    <div class="scan-feedback" id="scan-feedback">Zeskanuj produkt lub wpisz kod na klawiaturze</div>
+    <div class="scan-feedback" id="scan-feedback">Kliknij gdziekolwiek i zeskanuj produkt</div>
 
     <!-- MAIN INSTRUCTION CONTAINER -->
     <div class="main-instruction">
@@ -369,16 +382,55 @@
 </div>
 
 <script>
-// ─── SYNTEZA MOWY (SPEECH SYNTHESIS) ────────────────
+// ─── SYNTEZA MOWY (SPEECH SYNTHESIS) FIX ─────────────
+let speechEnabled = false;
+
 function speak(text) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel(); // Anuluj poprzednie wypowiedzi
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pl-PL';
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
+  if (!('speechSynthesis' in window)) return;
+
+  // Anuluj dotychczasowe wypowiedzi
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'pl-PL';
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+
+  // Pobierz dostępne głosy w przeglądarce i znajdź polski
+  const voices = window.speechSynthesis.getVoices();
+  const plVoice = voices.find(v => v.lang.includes('pl'));
+  if (plVoice) {
+    utterance.voice = plVoice;
   }
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function enableSpeechOnInteraction() {
+  if (!speechEnabled) {
+    speechEnabled = true;
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.resume();
+    }
+    speak('Zeskanuj artykuł');
+  }
+  ensureFocus();
+}
+
+function testSpeech(e) {
+  e.stopPropagation();
+  speechEnabled = true;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.resume();
+  }
+  speak('Test syntezy mowy. Zeskanuj artykuł');
+}
+
+// Przygotowanie głosów po załadowaniu
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+  };
 }
 
 // ─── DATA ───────────────────────────────────────────
@@ -392,21 +444,11 @@ const DEFAULT_PRODUCTS = [
   {id:7,barcode:'5900123456789',name:'Masło extra 200g',category:'Nabiał',price:8.49,stock:30,vat:5,unit:'szt',emoji:'🧈'},
   {id:8,barcode:'5901234500001',name:'Bułka kajzerka',category:'Pieczywo',price:0.79,stock:50,vat:5,unit:'szt',emoji:'🥐'},
   {id:9,barcode:'5905234001122',name:'Czekolada mleczna 100g',category:'Słodycze',price:3.29,stock:6,vat:23,unit:'szt',emoji:'🍫'},
-  {id:10,barcode:'5900100002233',name:'Kurczak filet 1kg',category:'Mięso',price:18.99,stock:15,vat:5,unit:'kg',emoji:'🍗'},
-  {id:11,barcode:'5901500123401',name:'Proszek do prania 2kg',category:'Chemia',price:22.99,stock:18,vat:23,unit:'szt',emoji:'🧺'},
-  {id:12,barcode:'5905600001234',name:'Coca-Cola 0.5L',category:'Napoje',price:3.99,stock:80,vat:23,unit:'szt',emoji:'🥤'},
-  {id:13,barcode:'5900800001112',name:'Jogurt naturalny 180g',category:'Nabiał',price:2.19,stock:3,vat:5,unit:'szt',emoji:'🫙'},
-  {id:14,barcode:'5901000234567',name:'Ciastka owsiane 150g',category:'Słodycze',price:4.49,stock:0,vat:23,unit:'szt',emoji:'🍪'},
-  {id:15,barcode:'5900234001230',name:'Płyn do naczyń 500ml',category:'Chemia',price:6.99,stock:25,vat:23,unit:'szt',emoji:'🫧'},
-  {id:16,barcode:'5900111222333',name:'Jabłka Gala 1kg',category:'Owoce',price:4.99,stock:40,vat:5,unit:'kg',emoji:'🍎'},
-  {id:17,barcode:'5900111222334',name:'Banany 1kg',category:'Owoce',price:3.49,stock:28,vat:5,unit:'kg',emoji:'🍌'},
-  {id:18,barcode:'5900111222335',name:'Marchew 1kg',category:'Warzywa',price:2.99,stock:35,vat:5,unit:'kg',emoji:'🥕'},
-  {id:19,barcode:'5900111222336',name:'Ziemniaki 2kg',category:'Warzywa',price:3.99,stock:20,vat:5,unit:'szt',emoji:'🥔'},
-  {id:20,barcode:'5900111222337',name:'Herbata czarna 100g',category:'Napoje',price:6.49,stock:15,vat:23,unit:'szt',emoji:'🍵'},
+  {id:10,barcode:'5900100002233',name:'Kurczak filet 1kg',category:'Mięso',price:18.99,stock:15,vat:5,unit:'kg',emoji:'🍗'}
 ];
 
 let products = [];
-const CAT_EMOJI = {'Nabiał':'🥛','Pieczywo':'🍞','Napoje':'🥤','Mięso':'🥩','Słodycze':'🍬','Chemia':'🧴','Owoce':'🍎','Warzywa':'🥦'};
+const CAT_EMOJI = {'Nabiał':'🥛','Pieczywo':'🍞','Napoje':'🥤','Mięso':'🥩','Słodycze':'🍬'};
 
 function loadProducts() {
   const stored = localStorage.getItem('kasa_products');
@@ -749,14 +791,6 @@ function newTransaction() {
 loadProducts();
 renderCart();
 ensureFocus();
-
-// Inicjalizacja pierwszej komendy po kliknięciu użytkownika w stronę
-document.body.addEventListener('click', function startVoice() {
-  if (cart.length === 0) {
-    speak('Zeskanuj artykuł');
-  }
-  document.body.removeEventListener('click', startVoice);
-}, { once: true });
 </script>
 </body>
 </html>
