@@ -124,7 +124,7 @@
   .quick-pay .btn-pay:hover { background:#007a34; }
   .quick-pay .btn-pay:disabled { background:var(--surface3);color:var(--text2);cursor:not-allowed; }
 
-  /* ── RIGHT: RECEIPT PANEL (PANEL ZAKUPÓW Z DRUGIEJ STRONY) ── */
+  /* ── RIGHT: RECEIPT PANEL ── */
   .receipt-panel {
     width: 380px;
     background: var(--surface);
@@ -289,7 +289,7 @@
 
   </div>
 
-  <!-- RIGHT: RECEIPT PANEL (PANEL ZAKUPÓW Z DRUGIEJ STRONY) -->
+  <!-- RIGHT: RECEIPT PANEL -->
   <div class="receipt-panel">
     <div class="receipt-header">
       <h2>🧾 Twój Paragon</h2>
@@ -369,6 +369,18 @@
 </div>
 
 <script>
+// ─── SYNTEZA MOWY (SPEECH SYNTHESIS) ────────────────
+function speak(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel(); // Anuluj poprzednie wypowiedzi
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pl-PL';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
 // ─── DATA ───────────────────────────────────────────
 const DEFAULT_PRODUCTS = [
   {id:1,barcode:'5900233001234',name:'Mleko UHT 3.2% 1L',category:'Nabiał',price:3.49,stock:45,vat:8,unit:'szt',emoji:'🥛'},
@@ -450,6 +462,7 @@ function addToCart(id) {
   }
   renderCart();
   feedback(`✓ Dodano: ${p.name}`, 'ok');
+  speak(p.name);
 }
 
 function changeQty(id, delta) {
@@ -516,6 +529,7 @@ function scanBarcode() {
     addToCart(p.id);
   } else {
     feedback('✕ Nie znaleziono produktu o kodzie: '+code, 'err');
+    speak('Nie znaleziono artykułu. Spróbuj ponownie.');
   }
 }
 
@@ -541,6 +555,7 @@ function feedback(msg, cls) {
 function startPayment() {
   if (cart.length === 0) return;
   const total = getTotal();
+  speak('Wybierz sposób płatności');
   showPaymentDialog('💳','Wybierz sposób płatności','Wskazana kwota zostanie przetworzona wybraną metodą.',total,`
     <div class="payment-choice-grid">
       <button class="payment-choice" onclick="choosePayment('card')"><span>💳</span><b>Karta</b><small>Zbliżeniowo</small></button>
@@ -568,10 +583,13 @@ function choosePayment(method) {
   paymentMethod = method;
   closePaymentDialog();
   if (method === 'card') {
+    speak('Przyłóż kartę do terminala');
     showPaymentDialog('💳','Przykładaj kartę','Przyłóż kartę lub zegarek do terminala.',getTotal(),'',true);
   } else if (method === 'blik') {
+    speak('Wprowadź kod BLIK');
     openBlik();
   } else {
+    speak('Wprowadź kwotę gotówki');
     openCash();
   }
 }
@@ -594,6 +612,7 @@ function openBlik() {
   buildNumpad('numpad-grid', blikDigits, 6, ()=>{
     if (blikDigits.length===6) {
       document.getElementById('numpad-overlay').classList.remove('show');
+      speak('Zatwierdź płatność w aplikacji bankowej');
       showPaymentDialog('📱','Autoryzacja BLIK',`Zatwierdź płatność ${fmt(getTotal())} w aplikacji bankowej.`,getTotal(),`<p style="font-size:24px;font-weight:800;letter-spacing:6px;margin-top:12px;">${blikDigits.join('')}</p>`,true);
     }
   }, ()=>{
@@ -617,7 +636,11 @@ function openCash() {
   updateCashDisplay();
   buildNumpad('cash-numpad-grid', null, 10, (val)=>{
     cashPaid = parseFloat(cashDigits)||0;
-    if (cashPaid < getTotal()) { alert('Za mała kwota'); return; }
+    if (cashPaid < getTotal()) { 
+      speak('Podana kwota jest za mała');
+      alert('Za mała kwota'); 
+      return; 
+    }
     document.getElementById('cash-overlay').classList.remove('show');
     const change = cashPaid - getTotal();
     finishTransaction(change);
@@ -679,6 +702,12 @@ function finishTransaction(change) {
   document.getElementById('success-msg').textContent =
     change > 0 ? `Odbierz resztę: ${fmt(change)}` : 'Płatność zakończona pomyślnie.\nOdbierz paragon z drukarki.';
   document.getElementById('overlay-success').classList.add('show');
+
+  if (change > 0) {
+    speak(`Dziękujemy. Odbierz resztę oraz paragon.`);
+  } else {
+    speak('Dziękujemy za zakupy. Odbierz paragon.');
+  }
 }
 
 function printAndFinish() {
@@ -713,12 +742,21 @@ function newTransaction() {
   cashDigits = '';
   renderCart();
   ensureFocus();
+  speak('Zeskanuj artykuł');
 }
 
 // ─── INIT ────────────────────────────────────────────────
 loadProducts();
 renderCart();
 ensureFocus();
+
+// Inicjalizacja pierwszej komendy po kliknięciu użytkownika w stronę
+document.body.addEventListener('click', function startVoice() {
+  if (cart.length === 0) {
+    speak('Zeskanuj artykuł');
+  }
+  document.body.removeEventListener('click', startVoice);
+}, { once: true });
 </script>
 </body>
 </html>
