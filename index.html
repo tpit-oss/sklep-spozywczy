@@ -1,69 +1,319 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Baza danych — Kasa samoobsługowa</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/sql-wasm.js"></script>
-  <style>
-    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f5f8;color:#17202a}
-    header{background:#111827;color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center}
-    header h1{margin:0;font-size:22px} header span{opacity:.7}
-    main{max-width:1200px;margin:25px auto;padding:0 18px}
-    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
-    .card,.panel{background:white;border-radius:14px;padding:20px;box-shadow:0 3px 15px #00000010}
-    .card b{display:block;font-size:28px;margin-top:8px}.muted{color:#6b7280}
-    .panel{margin-bottom:20px}.panel h2{margin-top:0}
-    table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid #e5e7eb;text-align:left}
-    th{font-size:13px;color:#6b7280}.btn{display:inline-block;padding:11px 16px;border-radius:9px;background:#1769ff;color:white;text-decoration:none;border:0;cursor:pointer}
-    .status{padding:10px 12px;border-radius:8px;background:#eef2ff;margin-bottom:15px}
-    @media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System kas samoobsługowych</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/sql-wasm.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f4f5;
+            color: #222;
+        }
+
+        header {
+            height: 70px;
+            background: #ffffff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #15803d;
+        }
+
+        .open-kasa {
+            border: 0;
+            background: #15803d;
+            color: white;
+            padding: 13px 22px;
+            border-radius: 5px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1250px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 22px;
+            border-radius: 6px;
+        }
+
+        .stat-title {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .box-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #ddd;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 14px 18px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-size: 13px;
+            color: #777;
+            background: #fafafa;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .price {
+            font-weight: 700;
+        }
+
+        @media(max-width: 900px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width: 600px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 0 15px;
+            }
+
+            main {
+                margin-top: 20px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<header><h1>Panel bazy danych — Kasa samoobsługowa</h1><span>GitHub Pages / SQL.js</span></header>
+
+<header>
+    <div class="logo">
+        Kasa <span>samoobsługowa</span>
+    </div>
+
+    <button class="open-kasa" onclick="location.href='kasa-so.html'">
+        Otwórz kasę
+    </button>
+</header>
+
 <main>
-  <div id="status" class="status">Ładowanie bazy danych…</div>
-  <div class="cards">
-    <div class="card">Produkty<b id="products">—</b></div>
-    <div class="card">Kategorie<b id="categories">—</b></div>
-    <div class="card">Transakcje<b id="transactions">—</b></div>
-    <div class="card">Obrót<b id="sales">—</b></div>
-  </div>
-  <div class="panel">
-    <h2>Produkty w bazie</h2>
-    <table><thead><tr><th>ID</th><th>Nazwa</th><th>Kategoria</th><th>Cena</th><th>Kod</th></tr></thead>
-    <tbody id="productTable"></tbody></table>
-  </div>
-  <div class="panel">
-    <h2>Uruchomienie kasy</h2>
-    <p class="muted">Emulator korzysta z tej samej bazy <code>baza.sql</code>. Na GitHub Pages zmiany są przechowywane lokalnie w przeglądarce.</p>
-    <a class="btn" href="kasa-so.html">Otwórz kasę samoobsługową</a>
-  </div>
+
+    <h1>Panel systemu</h1>
+    <div class="subtitle">
+        Dane produktów, kategorii i transakcji
+    </div>
+
+    <section class="stats">
+
+        <div class="stat">
+            <div class="stat-title">Produkty</div>
+            <div class="stat-value" id="productsCount">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-title">Kategorie</div>
+            <div class="stat-value" id="categoriesCount">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-title">Transakcje</div>
+            <div class="stat-value" id="transactionsCount">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-title">Sprzedaż</div>
+            <div class="stat-value" id="salesValue">0,00 zł</div>
+        </div>
+
+    </section>
+
+    <section class="box">
+
+        <div class="box-header">
+            Lista produktów
+        </div>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produkt</th>
+                    <th>Kategoria</th>
+                    <th>Kod kreskowy</th>
+                    <th>Cena</th>
+                </tr>
+            </thead>
+
+            <tbody id="productsTable"></tbody>
+
+        </table>
+
+    </section>
+
 </main>
+
 <script>
-async function init(){
-  const status=document.querySelector('#status');
-  try{
-    const SQL=await initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/'+f});
-    const saved=localStorage.getItem('kasaDB');
-    let db;
-    if(saved){
-      const bytes=Uint8Array.from(atob(saved),c=>c.charCodeAt(0)); db=new SQL.Database(bytes);
-      status.textContent='Baza załadowana z pamięci przeglądarki.';
-    }else{
-      const sql=await (await fetch('baza.sql')).text(); db=new SQL.Database(); db.run(sql);
-      status.textContent='Baza baza.sql została załadowana.';
+
+let db;
+
+async function initDatabase() {
+
+    const SQL = await initSqlJs({
+        locateFile: file =>
+            `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/${file}`
+    });
+
+    const saved = localStorage.getItem("kasaDB");
+
+    if (saved) {
+
+        const bytes = Uint8Array.from(
+            atob(saved),
+            c => c.charCodeAt(0)
+        );
+
+        db = new SQL.Database(bytes);
+
+    } else {
+
+        const response = await fetch("baza.sql");
+        const sql = await response.text();
+
+        db = new SQL.Database();
+        db.run(sql);
     }
-    const q=(sql,p=[])=>db.exec(sql,p)[0]?.values||[];
-    document.querySelector('#products').textContent=q('SELECT COUNT(*) FROM produkty')[0][0];
-    document.querySelector('#categories').textContent=q('SELECT COUNT(*) FROM kategorie')[0][0];
-    document.querySelector('#transactions').textContent=q('SELECT COUNT(*) FROM transakcje')[0][0];
-    document.querySelector('#sales').textContent=(q("SELECT COALESCE(SUM(suma),0) FROM transakcje")[0][0]||0).toFixed(2)+' zł';
-    const rows=q(`SELECT p.id,p.nazwa,k.nazwa,p.cena,p.kod_kreskowy FROM produkty p JOIN kategorie k ON k.id=p.kategoria_id ORDER BY p.id`);
-    document.querySelector('#productTable').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${Number(r[3]).toFixed(2)} zł</td><td>${r[4]}</td></tr>`).join('');
-  }catch(e){status.textContent='Błąd ładowania bazy: '+e.message}
+
+    loadDashboard();
 }
-init();
+
+function loadDashboard() {
+
+    const products =
+        db.exec("SELECT COUNT(*) FROM produkty")[0].values[0][0];
+
+    const categories =
+        db.exec("SELECT COUNT(*) FROM kategorie")[0].values[0][0];
+
+    const transactions =
+        db.exec("SELECT COUNT(*) FROM transakcje")[0].values[0][0];
+
+    const sales =
+        db.exec("SELECT COALESCE(SUM(suma),0) FROM transakcje")[0].values[0][0];
+
+    document.getElementById("productsCount").textContent = products;
+    document.getElementById("categoriesCount").textContent = categories;
+    document.getElementById("transactionsCount").textContent = transactions;
+
+    document.getElementById("salesValue").textContent =
+        Number(sales).toFixed(2).replace(".", ",") + " zł";
+
+    const result = db.exec(`
+        SELECT
+            p.id,
+            p.nazwa,
+            k.nazwa,
+            p.kod_kreskowy,
+            p.cena
+        FROM produkty p
+        JOIN kategorie k
+            ON k.id = p.kategoria_id
+        ORDER BY p.id
+    `);
+
+    const tbody = document.getElementById("productsTable");
+
+    tbody.innerHTML = "";
+
+    if (!result.length) return;
+
+    result[0].values.forEach(row => {
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${row[0]}</td>
+            <td>${row[1]}</td>
+            <td>${row[2]}</td>
+            <td>${row[3]}</td>
+            <td class="price">
+                ${Number(row[4]).toFixed(2).replace(".", ",")} zł
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+initDatabase();
+
 </script>
-</body></html>
+
+</body>
+</html>
