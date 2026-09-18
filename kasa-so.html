@@ -47,277 +47,195 @@
   /* ── MAIN LAYOUT ── */
   .kiosk { display:flex;flex:1;overflow:hidden; }
 
-  /* ── LEFT: RECEIPT ── */
-  .receipt-panel {
-    width: 340px;
+  /* ── LEFT: SCANNER & ACTION PANEL ── */
+  .center-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: var(--surface);
-    border-left: 1px solid var(--border);border-right:0;
+    border-right: 1px solid var(--border);
+  }
+
+  /* SCANNER BAR */
+  .scanner-bar {
+    background: var(--surface2);
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .scanner-input-wrap { flex:1;position:relative;display:flex;align-items:center; }
+  .scanner-icon { position:absolute;left:14px;font-size:20px; }
+  #barcode-input {
+    width:100%;padding:14px 14px 14px 46px;
+    background:#fff;border:2px solid var(--accent);
+    border-radius:10px;color:var(--text);font-size:18px;
+    outline:none;caret-color:var(--accent);
+  }
+  #barcode-input::placeholder { color:var(--text2); }
+  .scan-btn { padding:14px 24px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap; }
+  .scan-btn:active { background:var(--accent2); }
+
+  .scan-feedback { padding:8px 16px;font-size:14px;color:var(--text2);text-align:center;min-height:28px; }
+  .scan-feedback.ok { color:var(--green);font-weight:600; }
+  .scan-feedback.err { color:var(--red);font-weight:600; }
+
+  /* WORKSPACE AREA (Brak widocznych produktów) */
+  .main-instruction {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    background: var(--surface);
+  }
+  .main-instruction .icon { font-size: 72px; margin-bottom: 16px; opacity: 0.8; }
+  .main-instruction h2 { font-size: 22px; margin-bottom: 8px; color: var(--text); }
+  .main-instruction p { color: var(--text2); font-size: 15px; max-width: 380px; }
+
+  /* QUICK PAY FOOTER */
+  .quick-pay {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    padding:20px;
+    background:var(--surface2);
+    border-top:1px solid var(--border);
+  }
+  .quick-pay-info { display:flex;flex-direction:column;gap:4px; }
+  .quick-pay-info span { font-size:13px;color:var(--text2); }
+  .quick-pay-info strong { font-size:28px;color:var(--accent); }
+  .quick-pay .btn-pay {
+    padding:16px 36px;
+    background:var(--green);
+    color:#fff;
+    border:none;
+    border-radius:var(--radius);
+    font-size:18px;
+    font-weight:800;
+    cursor:pointer;
+    letter-spacing:.5px;
+    transition:.15s;
+  }
+  .quick-pay .btn-pay:hover { background:#007a34; }
+  .quick-pay .btn-pay:disabled { background:var(--surface3);color:var(--text2);cursor:not-allowed; }
+
+  /* ── RIGHT: RECEIPT (PANEL ZAKUPÓW Z DRUGIEJ STRONY) ── */
+  .receipt-panel {
+    width: 380px;
+    background: var(--surface);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
   }
   .receipt-header {
     background: var(--surface2);
-    padding: 12px 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .receipt-header h2 { font-size:14px;font-weight:700; }
+  .receipt-header h2 { font-size:16px;font-weight:700; }
   .receipt-count { background:var(--accent);color:#fff;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700; }
-  .receipt-items { flex:1;overflow-y:auto;padding:8px; }
+  .receipt-items { flex:1;overflow-y:auto;padding:12px; }
   .receipt-items::-webkit-scrollbar { width:4px; }
   .receipt-items::-webkit-scrollbar-thumb { background:var(--border);border-radius:2px; }
   .receipt-item {
     background: var(--surface2);
     border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     border: 1px solid var(--border);
     animation: slideIn .15s ease;
   }
-  @keyframes slideIn { from{transform:translateX(-8px);opacity:0} to{transform:translateX(0);opacity:1} }
+  @keyframes slideIn { from{transform:translateX(8px);opacity:0} to{transform:translateX(0);opacity:1} }
   .item-icon { width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
   .item-info { flex:1;min-width:0; }
-  .item-name { font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-  .item-sub { font-size:11px;color:var(--text2);margin-top:1px; }
-  .item-price { font-size:14px;font-weight:700;color:var(--text);flex-shrink:0; }
-  .item-qty-ctrl { display:flex;align-items:center;gap:4px; }
+  .item-name { font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .item-sub { font-size:11px;color:var(--text2);margin-top:2px; }
+  .item-price { font-size:15px;font-weight:700;color:var(--text);flex-shrink:0; }
+  .item-qty-ctrl { display:flex;align-items:center;gap:6px;margin-top:4px; }
   .qty-btn { width:24px;height:24px;border-radius:6px;border:none;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center; }
-  .qty-minus { background:#3a4268;color:var(--text); }
+  .qty-minus { background:var(--surface3);color:var(--text); }
   .qty-plus { background:var(--accent);color:#fff; }
   .qty-val { font-size:13px;font-weight:700;min-width:20px;text-align:center; }
 
   /* RECEIPT SUMMARY */
   .receipt-summary {
     border-top: 1px solid var(--border);
-    padding: 12px 16px;
+    padding: 16px 20px;
     background: var(--surface2);
     flex-shrink: 0;
   }
-  .sum-row { display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px; }
-  .sum-total { display:flex;justify-content:space-between;font-size:20px;font-weight:800;margin-top:8px;border-top:1px solid var(--border);padding-top:10px; }
-  .sum-total span:last-child { color:#4df08a; }
-  .empty-receipt { text-align:center;padding:40px 20px;color:var(--text2); }
-  .empty-receipt .icon { font-size:40px;margin-bottom:10px; }
-  .empty-receipt p { font-size:13px; }
-
-  /* ── CENTER: SCANNER / PRODUCTS ── */
-  .center-panel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* SCANNER BAR */
-  .scanner-bar {
-    background: var(--surface2);
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-shrink: 0;
-  }
-  .scanner-input-wrap { flex:1;position:relative;display:flex;align-items:center; }
-  .scanner-icon { position:absolute;left:12px;font-size:18px; }
-  #barcode-input {
-    width:100%;padding:12px 12px 12px 42px;
-    background:#fff;border:2px solid var(--accent);
-    border-radius:10px;color:var(--text);font-size:16px;
-    outline:none;caret-color:var(--accent);
-  }
-  #barcode-input::placeholder { color:var(--text2); }
-  .scan-btn { padding:12px 20px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap; }
-  .scan-btn:active { background:var(--accent2); }
-
-  /* CATEGORY PILLS */
-  .cat-bar { display:none; /* wybór produktów wyłączony — kasa wymaga kodu */
-
-    padding: 10px 14px;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .cat-bar::-webkit-scrollbar { display:none; }
-  .cat-pill {
-    padding: 7px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    color: var(--text2);
-    transition: .15s;
-  }
-  .cat-pill.active { background:var(--accent);border-color:var(--accent);color:var(--text); }
-
-  /* PRODUCT GRID */
-  .product-grid-wrap { flex:1;overflow-y:auto;padding:12px;display:none; }
-  .product-grid-wrap::-webkit-scrollbar { width:4px; }
-  .product-grid-wrap::-webkit-scrollbar-thumb { background:var(--border);border-radius:2px; }
-  .product-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
-  .product-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px;
-    cursor: pointer;
-    transition: .12s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    position: relative;
-  }
-  .product-card:active { transform:scale(.96); }
-  .product-card:hover { border-color:var(--accent); }
-  .product-card.out { opacity:.45;cursor:not-allowed; }
-  .product-emoji { font-size:28px;margin-bottom:6px; }
-  .product-name { font-size:11px;font-weight:600;line-height:1.3;margin-bottom:6px;color:var(--text); }
-  .product-price { font-size:15px;font-weight:800;color:#4df08a; }
-  .product-unit { font-size:10px;color:var(--text2); }
-  .product-badge { position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:700; }
-  .badge-low { background:rgba(255,179,0,.2);color:#ffb300; }
-  .badge-out { background:rgba(229,57,53,.2);color:#ef9a9a; }
-
-  /* ── RIGHT: PAY PANEL ── */
-  .pay-panel {
-    width: 260px;
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-  }
-  .pay-header {
-    background: var(--surface2);
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size:14px;font-weight:700;
-  }
-  .pay-body { padding:16px;flex:1; }
-  .pay-methods { display:flex;flex-direction:column;gap:10px;margin-bottom:20px; }
-  .pay-method {
-    background: var(--surface2);
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    cursor: pointer;
-    text-align: center;
-    transition: .15s;
-  }
-  .pay-method.selected { border-color:var(--accent);background:rgba(0,102,255,.15); }
-  .pay-method:active { transform:scale(.97); }
-  .pay-method-icon { font-size:24px;margin-bottom:4px; }
-  .pay-method-name { font-size:12px;font-weight:700; }
-  .pay-method-sub { font-size:10px;color:var(--text2);margin-top:2px; }
-
-  .coupon-row { display:flex;gap:8px;margin-bottom:16px; }
-  .coupon-row input { flex:1;padding:9px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;outline:none; }
-  .coupon-row input:focus { border-color:var(--accent); }
-  .coupon-btn { padding:9px 12px;background:var(--surface3);border:none;border-radius:8px;color:var(--text);font-size:12px;font-weight:700;cursor:pointer; }
-
-  .pay-total-box { background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center; }
-  .pay-total-label { font-size:11px;color:var(--text2); }
-  .pay-total-amount { font-size:32px;font-weight:800;color:#4df08a;margin-top:4px; }
-
-  .btn-pay {
-    width:100%;padding:16px;background:var(--green);color:#fff;
-    border:none;border-radius:var(--radius);font-size:16px;font-weight:800;
-    cursor:pointer;letter-spacing:.5px;transition:.15s;
-  }
-  .btn-pay:active { background:#008a30; }
-  .btn-pay:disabled { background:var(--surface3);color:var(--text2);cursor:not-allowed; }
-  .btn-cancel {
-    width:100%;padding:11px;background:transparent;color:var(--red);
-    border:2px solid var(--red);border-radius:var(--radius);font-size:13px;font-weight:700;
-    cursor:pointer;margin-top:8px;
-  }
-  .btn-cancel:active { background:rgba(229,57,53,.1); }
+  .sum-row { display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:6px; }
+  .sum-total { display:flex;justify-content:space-between;font-size:22px;font-weight:800;margin-top:10px;border-top:1px solid var(--border);padding-top:12px; }
+  .sum-total span:last-child { color:var(--green); }
+  .empty-receipt { text-align:center;padding:60px 20px;color:var(--text2); }
+  .empty-receipt .icon { font-size:48px;margin-bottom:12px; }
+  .empty-receipt p { font-size:14px;line-height:1.4; }
 
   /* ── OVERLAY: PAYMENT ── */
   .overlay {
-    position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);
+    position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);
     display:none;align-items:center;justify-content:center;
   }
   .overlay.show { display:flex; }
   .dialog {
     background:#fff;border:1px solid var(--border);border-radius:20px;
-    padding:36px;max-width:420px;width:92%;text-align:center;animation:popIn .25s ease;
+    padding:32px;max-width:440px;width:92%;text-align:center;animation:popIn .25s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   }
   @keyframes popIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
-  .dialog-icon { font-size:56px;margin-bottom:16px; }
+  .dialog-icon { font-size:56px;margin-bottom:12px; }
   .dialog h2 { font-size:22px;font-weight:800;margin-bottom:8px; }
-  .dialog p { font-size:14px;color:var(--text2);line-height:1.6; }
-  .dialog .amount { font-size:36px;font-weight:800;color:#4df08a;margin:16px 0; }
-  .dialog-btns { display:flex;flex-direction:column;gap:10px;margin-top:24px; }
+  .dialog p { font-size:14px;color:var(--text2);line-height:1.5; }
+  .dialog .amount { font-size:36px;font-weight:800;color:var(--green);margin:16px 0; }
+  .dialog-btns { display:flex;flex-direction:column;gap:10px;margin-top:20px; }
   .dialog-btn { padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:.15s; }
   .dialog-btn-primary { background:var(--green);color:#fff; }
   .dialog-btn-secondary { background:var(--surface2);color:var(--text);border:1px solid var(--border); }
+  
   .payment-choice-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px; }
-  .payment-choice { background:#fff;border:2px solid var(--border);border-radius:12px;padding:14px 8px;cursor:pointer;color:var(--text); }
-  .payment-choice:hover { border-color:var(--accent);background:#f5f8fc; }
-  .payment-choice span { display:block;font-size:28px;margin-bottom:6px; }
-  .payment-choice b { display:block;font-size:12px; }
-  .payment-choice small { display:block;color:var(--text2);font-size:9px;margin-top:3px; }
-
+  .payment-choice { background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:16px 8px;cursor:pointer;color:var(--text);transition:.15s; }
+  .payment-choice:hover { border-color:var(--accent);background:#fff; }
+  .payment-choice span { display:block;font-size:32px;margin-bottom:6px; }
+  .payment-choice b { display:block;font-size:13px; }
+  .payment-choice small { display:block;color:var(--text2);font-size:10px;margin-top:4px; }
 
   /* NUMPAD overlay */
   .numpad-overlay {
-    position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.8);
+    position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);
     display:none;align-items:flex-end;justify-content:center;
   }
   .numpad-overlay.show { display:flex; }
   .numpad {
     background:var(--surface);border-top:1px solid var(--border);
-    padding:20px;width:100%;max-width:400px;border-radius:20px 20px 0 0;
+    padding:24px;width:100%;max-width:400px;border-radius:20px 20px 0 0;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
   }
-  .numpad h3 { font-size:14px;font-weight:700;margin-bottom:12px;text-align:center;color:var(--text2); }
-  .numpad-display { background:#fff;border:2px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:22px;font-weight:700;text-align:right;margin-bottom:14px;min-height:50px; }
+  .numpad h3 { font-size:15px;font-weight:700;margin-bottom:12px;text-align:center;color:var(--text2); }
+  .numpad-display { background:var(--surface2);border:2px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:24px;font-weight:700;text-align:right;margin-bottom:16px;min-height:54px; }
   .numpad-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
   .num-btn {
-    padding:18px;border-radius:10px;font-size:18px;font-weight:700;
-    border:none;cursor:pointer;background:var(--surface2);color:var(--text);transition:.1s;
+    padding:18px;border-radius:10px;font-size:20px;font-weight:700;
+    border:1px solid var(--border);cursor:pointer;background:var(--surface2);color:var(--text);transition:.1s;
   }
   .num-btn:active { background:var(--surface3);transform:scale(.95); }
-  .num-btn.action { background:var(--accent);color:#fff; }
-  .num-btn.danger { background:var(--red);color:var(--text); }
+  .num-btn.action { background:var(--green);color:#fff;border:none; }
+  .num-btn.danger { background:#fce8e8;color:var(--red);border-color:#f5c6c6; }
 
-  /* TOPBAR STATUS LIGHTS */
-  .status-dot { width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px; }
-
-  /* SCAN FEEDBACK */
-  .scan-feedback { padding:4px 12px;font-size:12px;color:var(--text2);text-align:center;min-height:22px; }
-  .scan-feedback.ok { color:var(--green); }
-  .scan-feedback.err { color:var(--red); }
-
-  .quick-pay {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:18px;
-    padding:12px 16px;
-    background:#fff;
-    border-bottom:1px solid var(--border);
-  }
-  .quick-pay-info { display:flex;align-items:baseline;gap:12px; }
-  .quick-pay-info span { font-size:12px;color:var(--text2); }
-  .quick-pay-info strong { font-size:22px;color:var(--text); }
-  .quick-pay .btn-pay { width:auto;min-width:180px;padding:13px 24px; }
-
-
-  /* RECEIPT PRINT MODAL */
-  .print-receipt { background:#fff;color:#000;font-family:'Courier New',monospace;font-size:12px;padding:20px;border-radius:8px;max-width:300px;width:100%;line-height:1.7; }
+  /* PRINT RECEIPT MODAL */
+  .print-receipt { background:#fff;color:#000;font-family:'Courier New',monospace;font-size:12px;padding:20px;border-radius:8px;max-width:300px;width:100%;line-height:1.7;box-shadow: 0 0 10px rgba(0,0,0,0.1); }
   .print-receipt h3 { text-align:center;font-size:14px;margin-bottom:8px; }
   .print-receipt .divider { border-top:1px dashed #000;margin:8px 0; }
   .print-receipt .row { display:flex;justify-content:space-between; }
@@ -329,7 +247,7 @@
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-logo">
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0066ff"/><path d="M8 22V14l8-6 8 6v8H20v-5h-4v5H8z" fill="white"/></svg>
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0057b8"/><path d="M8 22V14l8-6 8 6v8H20v-5h-4v5H8z" fill="white"/></svg>
     <div>
       <h1>KASA SAMOOBSŁUGOWA</h1>
       <span>Stanowisko 3 · Sklep #001</span>
@@ -347,59 +265,55 @@
 <!-- KIOSK BODY -->
 <div class="kiosk">
 
-  <!-- LEFT: RECEIPT -->
-  <div class="receipt-panel">
-    <div class="receipt-header">
-      <h2>🧾 Paragon</h2>
-      <span class="receipt-count" id="item-count">0</span>
-    </div>
-    <div class="receipt-items" id="receipt-items">
-      <div class="empty-receipt">
-        <div class="icon">🛒</div>
-        <p>Zeskanuj produkt<br>lub wybierz z listy</p>
-      </div>
-    </div>
-    <div class="receipt-summary" id="receipt-summary">
-      <div class="sum-row"><span>Produkty:</span><span id="sum-items">0 szt</span></div>
-      <div class="sum-row"><span>VAT:</span><span id="sum-vat">0,00 zł</span></div>
-      <div class="sum-row"><span>Rabat:</span><span id="sum-discount" style="color:#ffb300">-0,00 zł</span></div>
-      <div class="sum-total"><span>DO ZAPŁATY</span><span id="sum-total">0,00 zł</span></div>
-    </div>
-  </div>
-
-  <!-- CENTER -->
+  <!-- LEFT: SCANNER AREA -->
   <div class="center-panel">
 
-    <!-- SCANNER BAR -->
     <div class="scanner-bar">
       <div class="scanner-input-wrap">
-        <span class="scanner-icon">📷</span>
+        <span class="scanner-icon">🏷️</span>
         <input type="text" id="barcode-input" placeholder="Zeskanuj kod kreskowy lub wpisz EAN…" autocomplete="off" inputmode="numeric">
       </div>
       <button class="scan-btn" onclick="scanBarcode()">DODAJ</button>
     </div>
     <div class="scan-feedback" id="scan-feedback">Wpisz lub zeskanuj kod produktu</div>
 
+    <!-- MAIN INSTRUCTION CONTAINER (BRAK PRODUKTÓW DO KLIKANIA) -->
+    <div class="main-instruction">
+      <div class="icon">🔍</div>
+      <h2>Wprowadź kod kreskowy</h2>
+      <p>Aby dodać produkt do listy zakupów, wpisz jego kod EAN w polu powyżej lub użyj skanera.</p>
+    </div>
+
+    <!-- FOOTER ACTION -->
     <div class="quick-pay">
       <div class="quick-pay-info">
-        <span>Do zapłaty</span>
+        <span>Razem do zapłaty</span>
         <strong id="quick-pay-total">0,00 zł</strong>
       </div>
       <button class="btn-pay" id="btn-pay" onclick="startPayment()" disabled>ZAPŁAĆ</button>
     </div>
 
-    <!-- CATEGORY PILLS -->
-    <div class="cat-bar" id="cat-bar">
-      <div class="cat-pill active" onclick="filterCat('',this)">Wszystkie</div>
-    </div>
-
-    <!-- PRODUCTS GRID -->
-    <div class="product-grid-wrap">
-      <div class="product-grid" id="product-grid"></div>
-    </div>
   </div>
 
-
+  <!-- RIGHT: RECEIPT PANEL (PRZENIESIONY NA DRUGĄ STRONĘ) -->
+  <div class="receipt-panel">
+    <div class="receipt-header">
+      <h2>🧾 Twój Paragon</h2>
+      <span class="receipt-count" id="item-count">0</span>
+    </div>
+    <div class="receipt-items" id="receipt-items">
+      <div class="empty-receipt">
+        <div class="icon">🛒</div>
+        <p>Brak produktów na liście.<br>Zeskanuj pierwszy kod.</p>
+      </div>
+    </div>
+    <div class="receipt-summary" id="receipt-summary">
+      <div class="sum-row"><span>Produkty:</span><span id="sum-items">0 szt</span></div>
+      <div class="sum-row"><span>VAT:</span><span id="sum-vat">0,00 zł</span></div>
+      <div class="sum-row"><span>Rabat:</span><span id="sum-discount" style="color:var(--yellow)">-0,00 zł</span></div>
+      <div class="sum-total"><span>RAZEM</span><span id="sum-total">0,00 zł</span></div>
+    </div>
+  </div>
 
 </div>
 
@@ -407,8 +321,8 @@
 <div class="overlay" id="overlay-payment">
   <div class="dialog" id="payment-dialog">
     <div class="dialog-icon" id="pd-icon">💳</div>
-    <h2 id="pd-title">Przykładaj kartę</h2>
-    <p id="pd-msg">Przyłóż kartę lub zegarek do terminala płatniczego</p>
+    <h2 id="pd-title">Wybór płatności</h2>
+    <p id="pd-msg">Wybierz dogodną metodę płatności</p>
     <div class="amount" id="pd-amount">0,00 zł</div>
     <div id="pd-extra"></div>
     <div class="dialog-btns" id="pd-btns">
@@ -431,7 +345,7 @@
 <div class="numpad-overlay" id="cash-overlay">
   <div class="numpad">
     <h3>Podaj kwotę gotówki (zł)</h3>
-    <div class="numpad-display" id="cash-display">0</div>
+    <div class="numpad-display" id="cash-display">0,00 zł</div>
     <div class="numpad-grid" id="cash-numpad-grid"></div>
   </div>
 </div>
@@ -518,39 +432,6 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// ─── CATEGORIES ───────────────────────────────────────
-let currentCat = '';
-function buildCats() {
-  const cats = ['Wszystkie', ...new Set(products.map(p=>p.category))];
-  const bar = document.getElementById('cat-bar');
-  bar.innerHTML = cats.map((c,i)=>`
-    <div class="cat-pill ${i===0?'active':''}" onclick="filterCat('${c==='Wszystkie'?'':c}',this)">${CAT_EMOJI[c]||''} ${c}</div>
-  `).join('');
-}
-function filterCat(cat, el) {
-  currentCat = cat;
-  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  renderGrid();
-}
-
-// ─── PRODUCT GRID ───────────────────────────────────────
-function renderGrid() {
-  const list = currentCat ? products.filter(p=>p.category===currentCat) : products;
-  document.getElementById('product-grid').innerHTML = list.map(p => {
-    const out = p.stock === 0;
-    const low = p.stock > 0 && p.stock <= 5;
-    return `<div class="product-card ${out?'out':''}" onclick="${out?'':` addToCart(${p.id})`}">
-      <div class="product-emoji">${p.emoji}</div>
-      <div class="product-name">${p.name}</div>
-      <div class="product-price">${p.price.toFixed(2)} zł</div>
-      <div class="product-unit">/${p.unit}</div>
-      ${out?`<span class="product-badge badge-out">BRAK</span>`:''}
-      ${low?`<span class="product-badge badge-low">OST ${p.stock}</span>`:''}
-    </div>`;
-  }).join('');
-}
-
 // ─── CART ───────────────────────────────────────────────
 function addToCart(id) {
   const p = products.find(x=>x.id===id);
@@ -576,22 +457,22 @@ function changeQty(id, delta) {
 function renderCart() {
   const el = document.getElementById('receipt-items');
   if (cart.length === 0) {
-    el.innerHTML = `<div class="empty-receipt"><div class="icon">🛒</div><p>Zeskanuj produkt<br>lub wybierz z listy</p></div>`;
+    el.innerHTML = `<div class="empty-receipt"><div class="icon">🛒</div><p>Brak produktów na liście.<br>Zeskanuj pierwszy kod.</p></div>`;
   } else {
     el.innerHTML = cart.map(item => `
       <div class="receipt-item">
-        <div class="item-icon" style="background:rgba(79,110,247,.2)">${item.emoji}</div>
+        <div class="item-icon" style="background:rgba(0,87,184,0.1)">${item.emoji}</div>
         <div class="item-info">
           <div class="item-name">${item.name}</div>
           <div class="item-sub">${item.price.toFixed(2)} zł × ${item.qty}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <div class="item-price">${(item.price*item.qty).toFixed(2)} zł</div>
           <div class="item-qty-ctrl">
             <button class="qty-btn qty-minus" onclick="changeQty(${item.id},-1)">−</button>
             <span class="qty-val">${item.qty}</span>
             <button class="qty-btn qty-plus" onclick="changeQty(${item.id},1)">+</button>
           </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="item-price">${(item.price*item.qty).toFixed(2)} zł</div>
         </div>
       </div>`).join('');
   }
@@ -630,49 +511,27 @@ function scanBarcode() {
     addToCart(p.id);
     document.getElementById('barcode-input').value = '';
   } else {
-    feedback('✕ Nie znaleziono produktu: '+code, 'err');
+    feedback('✕ Nie znaleziono produktu o kodzie: '+code, 'err');
   }
 }
+
 const barcodeInput = document.getElementById('barcode-input');
-barcodeInput.addEventListener('input', () => {
-  document.querySelector('.scan-btn').disabled = barcodeInput.value.trim() === '';
-});
 barcodeInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') scanBarcode();
 });
-
 
 function feedback(msg, cls) {
   const el = document.getElementById('scan-feedback');
   el.textContent = msg;
   el.className = 'scan-feedback ' + (cls||'');
-  setTimeout(()=>{ el.textContent='Gotowy do skanowania'; el.className='scan-feedback'; }, 2000);
-}
-
-// ─── COUPON ──────────────────────────────────────────────
-const COUPONS = {'RABAT10':0.10,'WITAJ5':5.00,'PROMO20':0.20};
-function applyCoupon() {
-  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-  const v = COUPONS[code];
-  if (!v) { alert('Nieprawidłowy kod rabatowy'); return; }
-  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-  discount = v < 1 ? subtotal * v : Math.min(v, subtotal);
-  document.getElementById('coupon-input').value = '';
-  updateTotals();
-  feedback(`✓ Rabat zastosowany: ${fmt(discount)}`, 'ok');
+  setTimeout(()=>{ el.textContent='Wpisz lub zeskanuj kod produktu'; el.className='scan-feedback'; }, 2500);
 }
 
 // ─── PAYMENT ─────────────────────────────────────────────
-function selectPayment(method, el) {
-  paymentMethod = method;
-  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
 function startPayment() {
   if (cart.length === 0) return;
   const total = getTotal();
-  showPaymentDialog('💳','Wybierz sposób płatności','Wybierz metodę płatności dla tej transakcji.',total,`
+  showPaymentDialog('💳','Wybierz sposób płatności','Wskazana kwota zostanie przetworzona wybraną metodą.',total,`
     <div class="payment-choice-grid">
       <button class="payment-choice" onclick="choosePayment('card')"><span>💳</span><b>Karta</b><small>Zbliżeniowo</small></button>
       <button class="payment-choice" onclick="choosePayment('blik')"><span>📱</span><b>BLIK</b><small>Kod 6-cyfrowy</small></button>
@@ -724,7 +583,7 @@ function openBlik() {
   buildNumpad('numpad-grid', blikDigits, 6, ()=>{
     if (blikDigits.length===6) {
       document.getElementById('numpad-overlay').classList.remove('show');
-      showPaymentDialog('📱','Autoryzacja BLIK',`Zatwierdź płatność ${fmt(getTotal())} w aplikacji bankowej.`,getTotal(),`<p style="font-size:22px;font-weight:800;letter-spacing:6px;margin-top:8px;">${blikDigits.join('')}</p>`,true);
+      showPaymentDialog('📱','Autoryzacja BLIK',`Zatwierdź płatność ${fmt(getTotal())} w aplikacji bankowej.`,getTotal(),`<p style="font-size:24px;font-weight:800;letter-spacing:6px;margin-top:12px;">${blikDigits.join('')}</p>`,true);
     }
   }, ()=>document.getElementById('numpad-overlay').classList.remove('show'));
   document.getElementById('numpad-overlay').classList.add('show');
@@ -772,7 +631,8 @@ function buildNumpad(gridId, arr, maxLen, onConfirm, onCancel, isCash) {
   const cancel = document.createElement('button');
   cancel.className='num-btn';
   cancel.style.gridColumn='1/-1';
-  cancel.style.background='#3a4268';
+  cancel.style.background='var(--surface3)';
+  cancel.style.color='var(--text)';
   cancel.textContent='✕ Anuluj';
   cancel.onclick = onCancel;
   grid.appendChild(cancel);
@@ -833,19 +693,11 @@ function newTransaction() {
   blikDigits = [];
   cashDigits = '';
   renderCart();
-  filterCat('', document.querySelector('.cat-pill'));
   document.getElementById('barcode-input').focus();
-}
-
-function cancelTransaction() {
-  if (cart.length === 0) return;
-  if (confirm('Anulować całą transakcję?')) newTransaction();
 }
 
 // ─── INIT ────────────────────────────────────────────────
 loadProducts();
-buildCats();
-renderGrid();
 renderCart();
 document.getElementById('barcode-input').focus();
 </script>
