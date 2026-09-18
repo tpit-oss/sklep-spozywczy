@@ -1,319 +1,468 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System kas samoobsługowych</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administratora – Kasa Samoobsługowa</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3355;
+    --accent: #4f6ef7;
+    --accent2: #7c3aed;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e8eaf6;
+    --text2: #9299b8;
+    --radius: 10px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/sql-wasm.js"></script>
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px; }
+  .logo h1 { font-size:16px;font-weight:600;letter-spacing:.3px; }
+  .logo p { font-size:11px;color:var(--text2);margin-top:1px; }
+  .header-actions { display:flex;gap:10px;align-items:center; }
+  .badge { background:var(--accent);color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600; }
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  /* TABS */
+  .tabs { display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 28px;background:var(--surface); }
+  .tab { padding:12px 20px;cursor:pointer;font-size:13px;color:var(--text2);border-bottom:2px solid transparent;transition:.2s;user-select:none; }
+  .tab.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:600; }
+  .tab:hover:not(.active) { color:var(--text); }
 
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f3f4f5;
-            color: #222;
-        }
+  /* LAYOUT */
+  .main { padding:28px;max-width:1200px;margin:0 auto; }
+  .panel { display:none; }
+  .panel.active { display:block; }
 
-        header {
-            height: 70px;
-            background: #ffffff;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 28px;
-        }
+  /* TOOLBAR */
+  .toolbar { display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap; }
+  .search-box { flex:1;min-width:220px;position:relative; }
+  .search-box input { width:100%;padding:9px 12px 9px 36px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;outline:none; }
+  .search-box input:focus { border-color:var(--accent); }
+  .search-box svg { position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none; }
+  select.filter { padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;outline:none;cursor:pointer; }
+  .btn { padding:9px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px; }
+  .btn-primary { background:var(--accent);color:#fff; }
+  .btn-primary:hover { background:#3d5ce8; }
+  .btn-danger { background:var(--red);color:#fff; }
+  .btn-ghost { background:transparent;border:1px solid var(--border);color:var(--text); }
+  .btn-ghost:hover { background:var(--surface2); }
+  .btn-green { background:var(--green);color:#fff; }
 
-        .logo {
-            font-size: 21px;
-            font-weight: 700;
-        }
+  /* TABLE */
+  .table-wrap { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden; }
+  table { width:100%;border-collapse:collapse; }
+  th { background:var(--surface2);padding:11px 14px;text-align:left;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border); }
+  td { padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(79,110,247,.07); }
+  .barcode { font-family:monospace;font-size:12px;color:var(--text2); }
+  .price-cell { font-weight:700;color:var(--text); }
+  .stock-ok { color:var(--green); }
+  .stock-low { color:var(--yellow); }
+  .stock-out { color:var(--red); }
+  .cat-badge { padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600; }
+  .cat-0 { background:rgba(79,110,247,.2);color:#8aa4ff; }
+  .cat-1 { background:rgba(34,197,94,.2);color:#4ade80; }
+  .cat-2 { background:rgba(245,158,11,.2);color:#fcd34d; }
+  .cat-3 { background:rgba(239,68,68,.2);color:#fca5a5; }
+  .cat-4 { background:rgba(124,58,237,.2);color:#c4b5fd; }
+  .cat-5 { background:rgba(20,184,166,.2);color:#5eead4; }
+  .action-btns { display:flex;gap:6px; }
+  .btn-sm { padding:5px 10px;font-size:12px; }
 
-        .logo span {
-            color: #15803d;
-        }
+  /* MODAL */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--surface);border:1px solid var(--border);border-radius:14px;width:460px;max-width:95vw;padding:28px;animation:modalIn .2s ease; }
+  @keyframes modalIn { from{transform:scale(.94);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal h2 { font-size:16px;margin-bottom:20px;font-weight:700; }
+  .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+  .form-grid .full { grid-column:1/-1; }
+  .form-group label { display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:600; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+  .form-group textarea { resize:vertical;min-height:60px; }
+  .modal-footer { display:flex;justify-content:flex-end;gap:10px;margin-top:20px; }
 
-        .open-kasa {
-            border: 0;
-            background: #15803d;
-            color: white;
-            padding: 13px 22px;
-            border-radius: 5px;
-            font-size: 15px;
-            cursor: pointer;
-        }
+  /* STATS */
+  .stats-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px; }
+  .stat-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px; }
+  .stat-card .label { font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.6px; }
+  .stat-card .value { font-size:28px;font-weight:700;margin-top:6px; }
+  .stat-card .sub { font-size:12px;color:var(--text2);margin-top:3px; }
 
-        main {
-            max-width: 1250px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
+  /* SQL EXPORT */
+  .sql-box { background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:monospace;font-size:12px;color:#a5f3fc;max-height:340px;overflow-y:auto;white-space:pre;line-height:1.7; }
 
-        h1 {
-            margin: 0 0 8px;
-            font-size: 30px;
-        }
+  /* PAGINATION */
+  .pagination { display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--text2); }
+  .page-btns { display:flex;gap:6px; }
+  .page-btn { padding:5px 11px;background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text);font-size:12px; }
+  .page-btn:hover { border-color:var(--accent); }
+  .page-btn.active { background:var(--accent);border-color:var(--accent);color:#fff; }
 
-        .subtitle {
-            color: #777;
-            margin-bottom: 30px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 22px;
-            border-radius: 6px;
-        }
-
-        .stat-title {
-            color: #777;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .box {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .box-header {
-            padding: 18px 20px;
-            border-bottom: 1px solid #ddd;
-            font-weight: 700;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 14px 18px;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            font-size: 13px;
-            color: #777;
-            background: #fafafa;
-        }
-
-        td {
-            font-size: 14px;
-        }
-
-        .price {
-            font-weight: 700;
-        }
-
-        @media(max-width: 900px) {
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media(max-width: 600px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                padding: 0 15px;
-            }
-
-            main {
-                margin-top: 20px;
-            }
-        }
-    </style>
+  /* TOAST */
+  .toast { position:fixed;bottom:28px;right:28px;background:#22c55e;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none; }
+  .toast.show { opacity:1; }
+</style>
 </head>
-
 <body>
 
 <header>
-    <div class="logo">
-        Kasa <span>samoobsługowa</span>
+  <div class="logo">
+    <div class="logo-icon">🛒</div>
+    <div>
+      <h1>Kasa Samoobsługowa</h1>
+      <p>Panel administratora · baza.sql</p>
     </div>
-
-    <button class="open-kasa" onclick="location.href='kasa-so.html'">
-        Otwórz kasę
-    </button>
+  </div>
+  <div class="header-actions">
+    <a href="kasa-so.html" class="btn btn-primary" style="text-decoration:none;">▶ Uruchom kasę</a>
+  </div>
 </header>
 
-<main>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('products')">Produkty</div>
+  <div class="tab" onclick="switchTab('stats')">Statystyki</div>
+  <div class="tab" onclick="switchTab('sql')">Eksport SQL</div>
+</div>
 
-    <h1>Panel systemu</h1>
-    <div class="subtitle">
-        Dane produktów, kategorii i transakcji
+<div class="main">
+
+  <!-- PRODUCTS TAB -->
+  <div id="tab-products" class="panel active">
+    <div class="toolbar">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-input" placeholder="Szukaj po nazwie lub kodzie…" oninput="renderTable()">
+      </div>
+      <select class="filter" id="cat-filter" onchange="renderTable()">
+        <option value="">Wszystkie kategorie</option>
+        <option value="Nabiał">Nabiał</option>
+        <option value="Pieczywo">Pieczywo</option>
+        <option value="Napoje">Napoje</option>
+        <option value="Mięso">Mięso</option>
+        <option value="Słodycze">Słodycze</option>
+        <option value="Chemia">Chemia</option>
+      </select>
+      <select class="filter" id="stock-filter" onchange="renderTable()">
+        <option value="">Wszystkie stany</option>
+        <option value="ok">Dostępne</option>
+        <option value="low">Mało (≤10)</option>
+        <option value="out">Brak</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal()">+ Dodaj produkt</button>
+      <button class="btn btn-ghost" onclick="exportSQL()">↓ Pobierz SQL</button>
     </div>
 
-    <section class="stats">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Kod EAN</th>
+            <th>Nazwa produktu</th>
+            <th>Kategoria</th>
+            <th>Cena</th>
+            <th>Stan</th>
+            <th>VAT</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+        <tbody id="product-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <span id="pagination-info">Ładowanie…</span>
+      <div class="page-btns" id="page-btns"></div>
+    </div>
+  </div>
 
-        <div class="stat">
-            <div class="stat-title">Produkty</div>
-            <div class="stat-value" id="productsCount">0</div>
-        </div>
+  <!-- STATS TAB -->
+  <div id="tab-stats" class="panel">
+    <div class="stats-grid" id="stats-cards"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kategoria</th><th>Produktów</th><th>Śr. cena</th><th>Łączna wartość</th><th>Stan mag.</th></tr></thead>
+        <tbody id="stats-tbody"></tbody>
+      </table>
+    </div>
+  </div>
 
-        <div class="stat">
-            <div class="stat-title">Kategorie</div>
-            <div class="stat-value" id="categoriesCount">0</div>
-        </div>
+  <!-- SQL TAB -->
+  <div id="tab-sql" class="panel">
+    <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;">
+      <button class="btn btn-primary" onclick="refreshSQL()">↻ Odśwież SQL</button>
+      <button class="btn btn-green" onclick="copySQL()">Kopiuj do schowka</button>
+      <span style="font-size:12px;color:var(--text2);">Plik: baza.sql · SQLite compatible</span>
+    </div>
+    <div class="sql-box" id="sql-output">-- Kliknij "Odśwież SQL" aby wygenerować...</div>
+  </div>
 
-        <div class="stat">
-            <div class="stat-title">Transakcje</div>
-            <div class="stat-value" id="transactionsCount">0</div>
-        </div>
+</div>
 
-        <div class="stat">
-            <div class="stat-title">Sprzedaż</div>
-            <div class="stat-value" id="salesValue">0,00 zł</div>
-        </div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modal-title">Dodaj produkt</h2>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id">
+      <div class="form-group">
+        <label>Kod EAN</label>
+        <input type="text" id="f-barcode" placeholder="5900000000000">
+      </div>
+      <div class="form-group">
+        <label>Cena (PLN)</label>
+        <input type="number" id="f-price" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group full">
+        <label>Nazwa produktu</label>
+        <input type="text" id="f-name" placeholder="np. Mleko 3.2% 1L">
+      </div>
+      <div class="form-group">
+        <label>Kategoria</label>
+        <select id="f-category">
+          <option>Nabiał</option>
+          <option>Pieczywo</option>
+          <option>Napoje</option>
+          <option>Mięso</option>
+          <option>Słodycze</option>
+          <option>Chemia</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Stan magazynowy</label>
+        <input type="number" id="f-stock" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Stawka VAT (%)</label>
+        <select id="f-vat">
+          <option value="5">5%</option>
+          <option value="8">8%</option>
+          <option value="23" selected>23%</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Jednostka</label>
+        <select id="f-unit">
+          <option value="szt">szt</option>
+          <option value="kg">kg</option>
+          <option value="l">l</option>
+          <option value="g">g</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Anuluj</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Zapisz</button>
+    </div>
+  </div>
+</div>
 
-    </section>
-
-    <section class="box">
-
-        <div class="box-header">
-            Lista produktów
-        </div>
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Produkt</th>
-                    <th>Kategoria</th>
-                    <th>Kod kreskowy</th>
-                    <th>Cena</th>
-                </tr>
-            </thead>
-
-            <tbody id="productsTable"></tbody>
-
-        </table>
-
-    </section>
-
-</main>
+<div class="toast" id="toast"></div>
 
 <script>
+const CATS = ['Nabiał','Pieczywo','Napoje','Mięso','Słodycze','Chemia'];
+const CAT_I = Object.fromEntries(CATS.map((c,i)=>[c,i]));
 
-let db;
+let products = JSON.parse(localStorage.getItem('kasa_products') || 'null') || [
+  {id:1,barcode:'5900233001234',name:'Mleko UHT 3.2% 1L',category:'Nabiał',price:3.49,stock:45,vat:8,unit:'szt'},
+  {id:2,barcode:'5901001234567',name:'Chleb razowy 500g',category:'Pieczywo',price:4.20,stock:12,vat:5,unit:'szt'},
+  {id:3,barcode:'5905555123456',name:'Woda mineralna 1.5L',category:'Napoje',price:1.89,stock:120,vat:8,unit:'szt'},
+  {id:4,barcode:'5903001234560',name:'Ser Gouda plastry 150g',category:'Nabiał',price:7.99,stock:8,vat:5,unit:'szt'},
+  {id:5,barcode:'5900400001122',name:'Kiełbasa krakowska 300g',category:'Mięso',price:12.49,stock:22,vat:5,unit:'szt'},
+  {id:6,barcode:'5901771234567',name:'Sok pomarańczowy 1L',category:'Napoje',price:5.99,stock:0,vat:5,unit:'szt'},
+  {id:7,barcode:'5900123456789',name:'Masło extra 200g',category:'Nabiał',price:8.49,stock:30,vat:5,unit:'szt'},
+  {id:8,barcode:'5901234500001',name:'Bułka kajzerka',category:'Pieczywo',price:0.79,stock:50,vat:5,unit:'szt'},
+  {id:9,barcode:'5905234001122',name:'Czekolada mleczna 100g',category:'Słodycze',price:3.29,stock:6,vat:23,unit:'szt'},
+  {id:10,barcode:'5900100002233',name:'Kurczak filet 1kg',category:'Mięso',price:18.99,stock:15,vat:5,unit:'kg'},
+  {id:11,barcode:'5901500123401',name:'Proszek do prania 2kg',category:'Chemia',price:22.99,stock:18,vat:23,unit:'szt'},
+  {id:12,barcode:'5905600001234',name:'Coca-Cola 0.5L',category:'Napoje',price:3.99,stock:80,vat:23,unit:'szt'},
+  {id:13,barcode:'5900800001112',name:'Jogurt naturalny 180g',category:'Nabiał',price:2.19,stock:3,vat:5,unit:'szt'},
+  {id:14,barcode:'5901000234567',name:'Ciastka owsiane 150g',category:'Słodycze',price:4.49,stock:0,vat:23,unit:'szt'},
+  {id:15,barcode:'5900234001230',name:'Płyn do naczyń 500ml',category:'Chemia',price:6.99,stock:25,vat:23,unit:'szt'},
+];
+let nextId = products.reduce((m,p)=>Math.max(m,p.id),0)+1;
+let currentPage = 1;
+const PAGE_SIZE = 10;
 
-async function initDatabase() {
+function save() { localStorage.setItem('kasa_products',JSON.stringify(products)); }
 
-    const SQL = await initSqlJs({
-        locateFile: file =>
-            `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/${file}`
-    });
-
-    const saved = localStorage.getItem("kasaDB");
-
-    if (saved) {
-
-        const bytes = Uint8Array.from(
-            atob(saved),
-            c => c.charCodeAt(0)
-        );
-
-        db = new SQL.Database(bytes);
-
-    } else {
-
-        const response = await fetch("baza.sql");
-        const sql = await response.text();
-
-        db = new SQL.Database();
-        db.run(sql);
-    }
-
-    loadDashboard();
+function filtered() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const cat = document.getElementById('cat-filter').value;
+  const st = document.getElementById('stock-filter').value;
+  return products.filter(p => {
+    if (q && !p.name.toLowerCase().includes(q) && !p.barcode.includes(q)) return false;
+    if (cat && p.category !== cat) return false;
+    if (st === 'ok' && p.stock <= 0) return false;
+    if (st === 'low' && (p.stock > 10 || p.stock <= 0)) return false;
+    if (st === 'out' && p.stock > 0) return false;
+    return true;
+  });
 }
 
-function loadDashboard() {
-
-    const products =
-        db.exec("SELECT COUNT(*) FROM produkty")[0].values[0][0];
-
-    const categories =
-        db.exec("SELECT COUNT(*) FROM kategorie")[0].values[0][0];
-
-    const transactions =
-        db.exec("SELECT COUNT(*) FROM transakcje")[0].values[0][0];
-
-    const sales =
-        db.exec("SELECT COALESCE(SUM(suma),0) FROM transakcje")[0].values[0][0];
-
-    document.getElementById("productsCount").textContent = products;
-    document.getElementById("categoriesCount").textContent = categories;
-    document.getElementById("transactionsCount").textContent = transactions;
-
-    document.getElementById("salesValue").textContent =
-        Number(sales).toFixed(2).replace(".", ",") + " zł";
-
-    const result = db.exec(`
-        SELECT
-            p.id,
-            p.nazwa,
-            k.nazwa,
-            p.kod_kreskowy,
-            p.cena
-        FROM produkty p
-        JOIN kategorie k
-            ON k.id = p.kategoria_id
-        ORDER BY p.id
-    `);
-
-    const tbody = document.getElementById("productsTable");
-
-    tbody.innerHTML = "";
-
-    if (!result.length) return;
-
-    result[0].values.forEach(row => {
-
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-            <td>${row[0]}</td>
-            <td>${row[1]}</td>
-            <td>${row[2]}</td>
-            <td>${row[3]}</td>
-            <td class="price">
-                ${Number(row[4]).toFixed(2).replace(".", ",")} zł
-            </td>
-        `;
-
-        tbody.appendChild(tr);
-    });
+function renderTable() {
+  const list = filtered();
+  const total = list.length;
+  const pages = Math.max(1, Math.ceil(total/PAGE_SIZE));
+  if (currentPage > pages) currentPage = 1;
+  const slice = list.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+  const tbody = document.getElementById('product-tbody');
+  tbody.innerHTML = slice.map(p => {
+    const ci = CAT_I[p.category]%6;
+    const sc = p.stock <= 0 ? 'stock-out' : p.stock <= 10 ? 'stock-low' : 'stock-ok';
+    const si = p.stock <= 0 ? '✗ 0' : p.stock <= 10 ? `⚠ ${p.stock}` : `✓ ${p.stock}`;
+    return `<tr>
+      <td>${p.id}</td>
+      <td class="barcode">${p.barcode}</td>
+      <td>${p.name}</td>
+      <td><span class="cat-badge cat-${ci}">${p.category}</span></td>
+      <td class="price-cell">${p.price.toFixed(2)} zł</td>
+      <td class="${sc}">${si}</td>
+      <td>${p.vat}%</td>
+      <td class="action-btns">
+        <button class="btn btn-ghost btn-sm" onclick="openModal(${p.id})">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="delProduct(${p.id})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('pagination-info').textContent = `Wyniki: ${total} produktów`;
+  const pb = document.getElementById('page-btns');
+  pb.innerHTML = '';
+  for (let i=1;i<=pages;i++) {
+    const b = document.createElement('button');
+    b.className = 'page-btn' + (i===currentPage?' active':'');
+    b.textContent = i;
+    b.onclick = ()=>{currentPage=i;renderTable();};
+    pb.appendChild(b);
+  }
 }
 
-initDatabase();
+function openModal(id) {
+  document.getElementById('edit-id').value = id||'';
+  document.getElementById('modal-title').textContent = id ? 'Edytuj produkt' : 'Dodaj produkt';
+  if (id) {
+    const p = products.find(x=>x.id===id);
+    document.getElementById('f-barcode').value = p.barcode;
+    document.getElementById('f-name').value = p.name;
+    document.getElementById('f-category').value = p.category;
+    document.getElementById('f-price').value = p.price;
+    document.getElementById('f-stock').value = p.stock;
+    document.getElementById('f-vat').value = p.vat;
+    document.getElementById('f-unit').value = p.unit;
+  } else {
+    ['f-barcode','f-name','f-price','f-stock'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-vat').value='23';
+    document.getElementById('f-unit').value='szt';
+    document.getElementById('f-category').value='Nabiał';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 
+function saveProduct() {
+  const id = parseInt(document.getElementById('edit-id').value)||null;
+  const p = {
+    id: id||nextId++,
+    barcode: document.getElementById('f-barcode').value.trim(),
+    name: document.getElementById('f-name').value.trim(),
+    category: document.getElementById('f-category').value,
+    price: parseFloat(document.getElementById('f-price').value)||0,
+    stock: parseInt(document.getElementById('f-stock').value)||0,
+    vat: parseInt(document.getElementById('f-vat').value),
+    unit: document.getElementById('f-unit').value,
+  };
+  if (!p.name||!p.barcode) { alert('Wypełnij nazwę i kod EAN'); return; }
+  if (id) { const i=products.findIndex(x=>x.id===id); products[i]=p; }
+  else products.push(p);
+  save(); renderTable(); closeModal();
+  toast(id?'Produkt zaktualizowany':'Produkt dodany');
+}
+
+function delProduct(id) {
+  if (!confirm('Usunąć produkt?')) return;
+  products = products.filter(p=>p.id!==id);
+  save(); renderTable(); toast('Produkt usunięty');
+}
+
+function renderStats() {
+  const total = products.length;
+  const totalValue = products.reduce((s,p)=>s+p.price*p.stock,0);
+  const outOfStock = products.filter(p=>p.stock===0).length;
+  const avgPrice = total ? products.reduce((s,p)=>s+p.price,0)/total : 0;
+  document.getElementById('stats-cards').innerHTML = `
+    <div class="stat-card"><div class="label">Produkty</div><div class="value">${total}</div><div class="sub">w bazie danych</div></div>
+    <div class="stat-card"><div class="label">Wartość magazynu</div><div class="value">${totalValue.toFixed(0)} zł</div><div class="sub">brutto</div></div>
+    <div class="stat-card"><div class="label">Brak w magazynie</div><div class="value" style="color:var(--red)">${outOfStock}</div><div class="sub">produktów</div></div>
+    <div class="stat-card"><div class="label">Śr. cena</div><div class="value">${avgPrice.toFixed(2)} zł</div><div class="sub">za produkt</div></div>
+  `;
+  const bycat = {};
+  CATS.forEach(c=>bycat[c]={count:0,totalPrice:0,totalValue:0,totalStock:0});
+  products.forEach(p=>{ if(bycat[p.category]){bycat[p.category].count++;bycat[p.category].totalPrice+=p.price;bycat[p.category].totalValue+=p.price*p.stock;bycat[p.category].totalStock+=p.stock;} });
+  document.getElementById('stats-tbody').innerHTML = CATS.map(c=>{
+    const d=bycat[c];
+    return `<tr><td>${c}</td><td>${d.count}</td><td>${d.count?(d.totalPrice/d.count).toFixed(2):'-'} zł</td><td>${d.totalValue.toFixed(2)} zł</td><td>${d.totalStock}</td></tr>`;
+  }).join('');
+}
+
+function refreshSQL() {
+  const ts = new Date().toISOString();
+  let sql = `-- =========================================\n-- Kasa Samoobslugowa :: baza.sql\n-- Wygenerowano: ${ts}\n-- =========================================\n\nPRAGMA foreign_keys = ON;\nPRAGMA journal_mode = WAL;\n\nCREATE TABLE IF NOT EXISTS products (\n  id         INTEGER PRIMARY KEY AUTOINCREMENT,\n  barcode    TEXT    NOT NULL UNIQUE,\n  name       TEXT    NOT NULL,\n  category   TEXT    NOT NULL,\n  price      REAL    NOT NULL,\n  stock      INTEGER NOT NULL DEFAULT 0,\n  vat        INTEGER NOT NULL DEFAULT 23,\n  unit       TEXT    NOT NULL DEFAULT 'szt',\n  created_at TEXT    DEFAULT CURRENT_TIMESTAMP,\n  updated_at TEXT    DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE IF NOT EXISTS transactions (\n  id         INTEGER PRIMARY KEY AUTOINCREMENT,\n  total      REAL    NOT NULL,\n  payment    TEXT    NOT NULL,\n  created_at TEXT    DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE IF NOT EXISTS transaction_items (\n  id             INTEGER PRIMARY KEY AUTOINCREMENT,\n  transaction_id INTEGER REFERENCES transactions(id),\n  product_id     INTEGER REFERENCES products(id),\n  quantity       INTEGER NOT NULL,\n  unit_price     REAL    NOT NULL\n);\n\nBEGIN TRANSACTION;\n\n`;
+  products.forEach(p=>{
+    sql += `INSERT OR REPLACE INTO products (id,barcode,name,category,price,stock,vat,unit) VALUES (${p.id},'${p.barcode}','${p.name.replace(/'/g,"''")}','${p.category}',${p.price},${p.stock},${p.vat},'${p.unit}');\n`;
+  });
+  sql += `\nCOMMIT;\n`;
+  document.getElementById('sql-output').textContent = sql;
+}
+
+function copySQL() {
+  navigator.clipboard.writeText(document.getElementById('sql-output').textContent).then(()=>toast('Skopiowano do schowka'));
+}
+
+function exportSQL() {
+  refreshSQL();
+  switchTab('sql');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const names=['products','stats','sql'];
+    t.classList.toggle('active',names[i]===name);
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='stats') renderStats();
+  if(name==='sql') refreshSQL();
+}
+
+renderTable();
 </script>
-
 </body>
 </html>
