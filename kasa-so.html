@@ -18,7 +18,6 @@
     --text: #17202a;
     --text2: #687585;
     --border: #dfe4ea;
-    --receipt-bg: #ffffff;
     --radius: 12px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -36,7 +35,6 @@
     flex-shrink: 0;
   }
   .topbar-logo { display:flex;align-items:center;gap:10px; }
-  .topbar-logo img { width:32px;height:32px; }
   .topbar-logo h1 { font-size:18px;font-weight:700;letter-spacing:.5px; }
   .topbar-logo span { font-size:11px;color:var(--text2);display:block; }
   .topbar-info { text-align:right; }
@@ -47,7 +45,7 @@
   /* ── MAIN LAYOUT ── */
   .kiosk { display:flex;flex:1;overflow:hidden; }
 
-  /* ── LEFT: SCANNER & ACTION PANEL ── */
+  /* ── LEFT: SCANNER AREA ── */
   .center-panel {
     flex: 1;
     display: flex;
@@ -57,33 +55,33 @@
     border-right: 1px solid var(--border);
   }
 
-  /* SCANNER BAR */
-  .scanner-bar {
+  /* UKRYTE POLE TEKSTOWE - PISANIE CAŁY CZAS WYMUSZONE W TLE */
+  #barcode-input {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  .scan-feedback {
+    padding: 12px 20px;
+    font-size: 16px;
+    color: var(--text2);
+    text-align: center;
+    min-height: 48px;
     background: var(--surface2);
-    padding: 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
-    gap: 12px;
     align-items: center;
-    flex-shrink: 0;
+    justify-content: center;
   }
-  .scanner-input-wrap { flex:1;position:relative;display:flex;align-items:center; }
-  .scanner-icon { position:absolute;left:14px;font-size:20px; }
-  #barcode-input {
-    width:100%;padding:14px 14px 14px 46px;
-    background:#fff;border:2px solid var(--accent);
-    border-radius:10px;color:var(--text);font-size:18px;
-    outline:none;caret-color:var(--accent);
-  }
-  #barcode-input::placeholder { color:var(--text2); }
-  .scan-btn { padding:14px 24px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap; }
-  .scan-btn:active { background:var(--accent2); }
+  .scan-feedback.ok { color:var(--green); font-weight:700; }
+  .scan-feedback.err { color:var(--red); font-weight:700; }
 
-  .scan-feedback { padding:8px 16px;font-size:14px;color:var(--text2);text-align:center;min-height:28px; }
-  .scan-feedback.ok { color:var(--green);font-weight:600; }
-  .scan-feedback.err { color:var(--red);font-weight:600; }
-
-  /* WORKSPACE AREA (Brak widocznych produktów) */
+  /* MAIN INSTRUCTION CONTAINER */
   .main-instruction {
     flex: 1;
     display: flex;
@@ -94,11 +92,11 @@
     text-align: center;
     background: var(--surface);
   }
-  .main-instruction .icon { font-size: 72px; margin-bottom: 16px; opacity: 0.8; }
-  .main-instruction h2 { font-size: 22px; margin-bottom: 8px; color: var(--text); }
-  .main-instruction p { color: var(--text2); font-size: 15px; max-width: 380px; }
+  .main-instruction .icon { font-size: 80px; margin-bottom: 16px; opacity: 0.85; }
+  .main-instruction h2 { font-size: 24px; margin-bottom: 8px; color: var(--text); }
+  .main-instruction p { color: var(--text2); font-size: 15px; max-width: 400px; line-height: 1.5; }
 
-  /* QUICK PAY FOOTER */
+  /* FOOTER ACTION */
   .quick-pay {
     display:flex;
     align-items:center;
@@ -126,7 +124,7 @@
   .quick-pay .btn-pay:hover { background:#007a34; }
   .quick-pay .btn-pay:disabled { background:var(--surface3);color:var(--text2);cursor:not-allowed; }
 
-  /* ── RIGHT: RECEIPT (PANEL ZAKUPÓW Z DRUGIEJ STRONY) ── */
+  /* ── RIGHT: RECEIPT PANEL (PANEL ZAKUPÓW Z DRUGIEJ STRONY) ── */
   .receipt-panel {
     width: 380px;
     background: var(--surface);
@@ -242,7 +240,7 @@
   .print-receipt .total-row { display:flex;justify-content:space-between;font-weight:700;font-size:14px; }
 </style>
 </head>
-<body>
+<body onclick="ensureFocus()">
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -268,20 +266,16 @@
   <!-- LEFT: SCANNER AREA -->
   <div class="center-panel">
 
-    <div class="scanner-bar">
-      <div class="scanner-input-wrap">
-        <span class="scanner-icon">🏷️</span>
-        <input type="text" id="barcode-input" placeholder="Zeskanuj kod kreskowy lub wpisz EAN…" autocomplete="off" inputmode="numeric">
-      </div>
-      <button class="scan-btn" onclick="scanBarcode()">DODAJ</button>
-    </div>
-    <div class="scan-feedback" id="scan-feedback">Wpisz lub zeskanuj kod produktu</div>
+    <!-- UKRYTE INPUT -->
+    <input type="text" id="barcode-input" autocomplete="off" inputmode="numeric">
 
-    <!-- MAIN INSTRUCTION CONTAINER (BRAK PRODUKTÓW DO KLIKANIA) -->
+    <div class="scan-feedback" id="scan-feedback">Zeskanuj produkt lub wpisz kod na klawiaturze</div>
+
+    <!-- MAIN INSTRUCTION CONTAINER -->
     <div class="main-instruction">
-      <div class="icon">🔍</div>
-      <h2>Wprowadź kod kreskowy</h2>
-      <p>Aby dodać produkt do listy zakupów, wpisz jego kod EAN w polu powyżej lub użyj skanera.</p>
+      <div class="icon">🏷️</div>
+      <h2>Zeskanuj produkt</h2>
+      <p>Zbliż kod EAN do skanera lub wpisz go na klawiaturze. Produkty automatycznie pojawią się w koszyku.</p>
     </div>
 
     <!-- FOOTER ACTION -->
@@ -295,7 +289,7 @@
 
   </div>
 
-  <!-- RIGHT: RECEIPT PANEL (PRZENIESIONY NA DRUGĄ STRONĘ) -->
+  <!-- RIGHT: RECEIPT PANEL (PANEL ZAKUPÓW Z DRUGIEJ STRONY) -->
   <div class="receipt-panel">
     <div class="receipt-header">
       <h2>🧾 Twój Paragon</h2>
@@ -321,7 +315,7 @@
 <div class="overlay" id="overlay-payment">
   <div class="dialog" id="payment-dialog">
     <div class="dialog-icon" id="pd-icon">💳</div>
-    <h2 id="pd-title">Wybór płatności</h2>
+    <h2 id="pd-title">Wybór płatności</h2>
     <p id="pd-msg">Wybierz dogodną metodę płatności</p>
     <div class="amount" id="pd-amount">0,00 zł</div>
     <div id="pd-extra"></div>
@@ -432,6 +426,18 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
+// ─── FORCE FOCUS MECHANISM ───────────────────────────
+function ensureFocus() {
+  const overlayShown = document.querySelector('.overlay.show, .numpad-overlay.show');
+  if (!overlayShown) {
+    const input = document.getElementById('barcode-input');
+    if (input && document.activeElement !== input) {
+      input.focus();
+    }
+  }
+}
+setInterval(ensureFocus, 200);
+
 // ─── CART ───────────────────────────────────────────────
 function addToCart(id) {
   const p = products.find(x=>x.id===id);
@@ -452,6 +458,7 @@ function changeQty(id, delta) {
   item.qty += delta;
   if (item.qty <= 0) cart = cart.filter(x=>x.id!==id);
   renderCart();
+  ensureFocus();
 }
 
 function renderCart() {
@@ -501,15 +508,12 @@ function fmt(n) { return n.toFixed(2).replace('.', ',') + ' zł'; }
 function scanBarcode() {
   const input = document.getElementById('barcode-input');
   const code = input.value.trim();
-  if (!code) {
-    input.focus();
-    feedback('⚠ Wpisz lub zeskanuj kod produktu', 'err');
-    return;
-  }
+  input.value = '';
+  if (!code) return;
+  
   const p = products.find(x => x.barcode === code);
   if (p) {
     addToCart(p.id);
-    document.getElementById('barcode-input').value = '';
   } else {
     feedback('✕ Nie znaleziono produktu o kodzie: '+code, 'err');
   }
@@ -517,14 +521,20 @@ function scanBarcode() {
 
 const barcodeInput = document.getElementById('barcode-input');
 barcodeInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') scanBarcode();
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    scanBarcode();
+  }
 });
 
 function feedback(msg, cls) {
   const el = document.getElementById('scan-feedback');
   el.textContent = msg;
   el.className = 'scan-feedback ' + (cls||'');
-  setTimeout(()=>{ el.textContent='Wpisz lub zeskanuj kod produktu'; el.className='scan-feedback'; }, 2500);
+  setTimeout(()=>{ 
+    el.textContent='Zeskanuj produkt lub wpisz kod na klawiaturze'; 
+    el.className='scan-feedback'; 
+  }, 2500);
 }
 
 // ─── PAYMENT ─────────────────────────────────────────────
@@ -568,6 +578,7 @@ function choosePayment(method) {
 
 function closePaymentDialog() {
   document.getElementById('overlay-payment').classList.remove('show');
+  ensureFocus();
 }
 
 function confirmPayment() {
@@ -585,9 +596,13 @@ function openBlik() {
       document.getElementById('numpad-overlay').classList.remove('show');
       showPaymentDialog('📱','Autoryzacja BLIK',`Zatwierdź płatność ${fmt(getTotal())} w aplikacji bankowej.`,getTotal(),`<p style="font-size:24px;font-weight:800;letter-spacing:6px;margin-top:12px;">${blikDigits.join('')}</p>`,true);
     }
-  }, ()=>document.getElementById('numpad-overlay').classList.remove('show'));
+  }, ()=>{
+    document.getElementById('numpad-overlay').classList.remove('show');
+    ensureFocus();
+  });
   document.getElementById('numpad-overlay').classList.add('show');
 }
+
 function updateBlikDisplay() {
   const slots = Array(6).fill('_');
   blikDigits.forEach((d,i)=>slots[i]=d);
@@ -606,9 +621,13 @@ function openCash() {
     document.getElementById('cash-overlay').classList.remove('show');
     const change = cashPaid - getTotal();
     finishTransaction(change);
-  }, ()=>document.getElementById('cash-overlay').classList.remove('show'), true);
+  }, ()=>{
+    document.getElementById('cash-overlay').classList.remove('show');
+    ensureFocus();
+  }, true);
   document.getElementById('cash-overlay').classList.add('show');
 }
+
 function updateCashDisplay() {
   document.getElementById('cash-display').textContent = (parseFloat(cashDigits)||0).toFixed(2)+' zł';
 }
@@ -693,13 +712,13 @@ function newTransaction() {
   blikDigits = [];
   cashDigits = '';
   renderCart();
-  document.getElementById('barcode-input').focus();
+  ensureFocus();
 }
 
 // ─── INIT ────────────────────────────────────────────────
 loadProducts();
 renderCart();
-document.getElementById('barcode-input').focus();
+ensureFocus();
 </script>
 </body>
 </html>
