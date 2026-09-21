@@ -6,10 +6,12 @@
 <title>Kasa Samoobsługowa</title>
 <style>
   :root {
-    --bg-color: #d8d8d8;
+    --bg-main: #cdcdcd;
     --panel-bg: #ffffff;
-    --border-color: #bcbcbc;
-    --green-btn: #009900;
+    --border-color: #b2b2b2;
+    --green-main: #009900;
+    --green-dark: #007700;
+    --red-alert: #e60000;
     --text-color: #000000;
   }
 
@@ -25,20 +27,19 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background-color: var(--bg-color);
+    background-color: var(--bg-main);
   }
 
-  /* Główny kontener aplikacji */
+  /* KONTENER GŁÓWNY */
   .kiosk-container {
     display: flex;
     width: 100%;
     height: 100%;
-    gap: 8px;
-    padding: 8px;
-    background-color: #e2e2e2;
+    gap: 6px;
+    padding: 6px;
+    background-color: var(--bg-main);
   }
 
-  /* Ukryte pole dla skanera */
   #barcode-input {
     position: absolute;
     top: -9999px;
@@ -48,40 +49,39 @@
 
   /* LEWY PANEL (Ostatni produkt + sterowanie) */
   .left-panel {
-    flex: 2;
+    flex: 1.8;
     display: flex;
     flex-direction: column;
     background-color: var(--panel-bg);
     border: 1px solid var(--border-color);
   }
 
-  /* Duża sekcja z ostatnio zeskanowanym produktem */
   .last-product-display {
     flex: 1;
-    padding: 20px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    position: relative;
   }
 
   .last-product-title {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
     color: var(--text-color);
-    line-height: 1.2;
-    max-width: 80%;
+    line-height: 1.25;
+    max-width: 85%;
+    word-break: break-word;
   }
 
   .last-product-price {
-    font-size: 42px;
+    font-size: 48px;
     font-weight: bold;
     color: var(--text-color);
     text-align: right;
     align-self: flex-end;
+    letter-spacing: -1px;
   }
 
-  /* Dolny pasek akcji w lewym panelu */
   .left-bottom-bar {
     border-top: 1px solid var(--border-color);
   }
@@ -90,48 +90,57 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
-    font-size: 14px;
+    padding: 12px 16px;
+    font-size: 15px;
     font-weight: bold;
+    color: #111;
     border-bottom: 1px solid var(--border-color);
   }
 
   .btn-help {
     display: flex;
     align-items: center;
-    gap: 6px;
-    color: var(--green-btn);
+    gap: 8px;
+    color: var(--green-main);
     cursor: pointer;
     border: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: bold;
   }
 
   .btn-help-icon {
-    width: 16px;
-    height: 16px;
-    background-color: var(--green-btn);
+    width: 22px;
+    height: 22px;
+    background-color: var(--green-main);
     border-radius: 50%;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
   }
 
   .btn-search {
     width: 100%;
-    background-color: var(--green-btn);
+    background-color: var(--green-main);
     color: white;
     border: none;
-    padding: 14px 15px;
-    font-size: 16px;
+    padding: 16px 20px;
+    font-size: 17px;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-search:active {
+    background-color: var(--green-dark);
   }
 
   .btn-search-icon {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   /* PRAWY PANEL (Lista paragonu + zapłata) */
@@ -146,22 +155,22 @@
   .receipt-list {
     flex: 1;
     overflow-y: auto;
-    padding: 10px 15px;
+    padding: 0 16px;
   }
 
   .receipt-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 10px 0;
+    padding: 12px 0;
     border-bottom: 1px solid var(--border-color);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: bold;
   }
 
   .receipt-row .name {
-    max-width: 70%;
-    line-height: 1.2;
+    max-width: 72%;
+    line-height: 1.25;
   }
 
   .receipt-row .price {
@@ -170,30 +179,36 @@
 
   .btn-pay {
     width: 100%;
-    background-color: var(--green-btn);
+    background-color: var(--green-main);
     color: white;
     border: none;
-    padding: 14px 15px;
-    font-size: 18px;
+    padding: 16px 20px;
+    font-size: 20px;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
     margin-top: auto;
+    transition: background 0.2s;
+  }
+
+  .btn-pay:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
   }
 
   .btn-pay-arrows {
-    font-size: 22px;
-    font-weight: bold;
+    font-size: 24px;
+    font-weight: 900;
     letter-spacing: -3px;
   }
 
-  /* MODAL / OVERLAY - "Poczekaj na pomoc" */
+  /* MODAL / OVERLAY - "POCZEKAJ NA POMOC" */
   .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.45);
     display: none;
     align-items: center;
     justify-content: center;
@@ -206,50 +221,64 @@
 
   .help-dialog {
     background: #ffffff;
-    width: 480px;
-    padding: 50px 30px;
-    border-radius: 4px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    width: 520px;
+    height: 280px;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     position: relative;
     display: flex;
     align-items: center;
-    gap: 20px;
+    padding: 0 40px;
+    gap: 30px;
+    border: 1px solid #d0d0d0;
   }
 
   .help-dialog-exclamation {
-    color: #ff0000;
-    font-size: 80px;
-    font-weight: bold;
+    color: var(--red-alert);
+    font-size: 140px;
+    font-weight: 900;
     line-height: 1;
+    margin-top: -10px;
   }
 
   .help-dialog-text {
-    color: #ff0000;
-    font-size: 32px;
-    font-weight: bold;
-    line-height: 1.1;
+    color: var(--red-alert);
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
   }
 
   .help-dialog-lock {
     position: absolute;
-    bottom: 15px;
+    bottom: 20px;
     right: 20px;
-    width: 28px;
-    height: 28px;
-    background: #ff0000;
-    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    background: var(--red-alert);
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 16px;
     cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+  }
+
+  .help-dialog-lock:active {
+    transform: scale(0.95);
+  }
+
+  .help-dialog-lock svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
   }
 </style>
 </head>
 <body onclick="initAudioAndFocus()">
 
-<input type="text" id="barcode-input" autocomplete="off">
+<input type="text" id="barcode-input" autocomplete="off" inputmode="numeric">
 
 <div class="kiosk-container">
   <!-- LEWA STRONA -->
@@ -262,9 +291,13 @@
     <div class="left-bottom-bar">
       <div class="status-and-help">
         <span id="scan-status-text">Zeskanuj artykuł</span>
-        <button class="btn-help" onclick="toggleHelpModal(true)">
+        <button class="btn-help" onclick="triggerHelp(event)">
           Wezwij pomoc
-          <span class="btn-help-icon"></span>
+          <span class="btn-help-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </span>
         </button>
       </div>
       <button class="btn-search" onclick="ensureFocus()">
@@ -276,18 +309,9 @@
 
   <!-- PRAWA STRONA -->
   <div class="right-panel">
-    <div class="receipt-list" id="receipt-list">
-      <div class="receipt-row">
-        <span class="name">Nazwa produktu który został zeskanowany</span>
-        <span class="price">CENA</span>
-      </div>
-      <div class="receipt-row">
-        <span class="name">Nazwa produktu który został zeskanowany</span>
-        <span class="price">CENA</span>
-      </div>
-    </div>
+    <div class="receipt-list" id="receipt-list"></div>
 
-    <button class="btn-pay" onclick="handlePay()">
+    <button class="btn-pay" id="btn-pay" onclick="handlePay()" disabled>
       <span>Zapłać</span>
       <span class="btn-pay-arrows">&gt;&gt;&gt;</span>
     </button>
@@ -298,22 +322,89 @@
 <div class="overlay" id="help-overlay">
   <div class="help-dialog">
     <div class="help-dialog-exclamation">!</div>
-    <div class="help-dialog-text">Poczekaj na pomoc</div>
-    <div class="help-dialog-lock" onclick="toggleHelpModal(false)">🔒</div>
+    <div class="help-dialog-text">Poczekaj<br>na pomoc</div>
+    <div class="help-dialog-lock" onclick="closeHelp(event)" title="Odblokuj">
+      <svg viewBox="0 0 24 24">
+        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+      </svg>
+    </div>
   </div>
 </div>
 
 <script>
-  let audioCtx = null;
-  let cart = [];
+  // ─── BAZA PRODUKTÓW ───
+  const database = [
+    { barcode: '1', name: 'Mleko UHT 3.2% 1L', price: 3.49 },
+    { barcode: '2', name: 'Chleb razowy 500g', price: 4.20 },
+    { barcode: '3', name: 'Woda mineralna 1.5L', price: 1.89 },
+    { barcode: '4', name: 'Ser Gouda 150g', price: 7.99 },
+    { barcode: '5900233001234', name: 'Mleko Wiejskie 2%', price: 3.99 },
+    { barcode: '5901001234567', name: 'Kawa Mielona 250g', price: 14.99 }
+  ];
 
+  let cart = [];
+  let audioCtx = null;
+  let voicesList = [];
+
+  // ─── OBSŁUGA AUDIO & SYNTEZY MOWY ───
   function initAudioAndFocus() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.resume();
+      loadVoices();
+    }
     ensureFocus();
   }
 
+  function loadVoices() {
+    if ('speechSynthesis' in window) {
+      voicesList = window.speechSynthesis.getVoices();
+    }
+  }
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function playBeep(freq = 900, duration = 0.12) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+  }
+
+  function speak(text, toneFreq = 900) {
+    playBeep(toneFreq);
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pl-PL';
+      utterance.rate = 1.0;
+      
+      if (voicesList.length === 0) loadVoices();
+      const plVoice = voicesList.find(v => v.lang.includes('pl') || v.lang.includes('PL'));
+      if (plVoice) utterance.voice = plVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  // ─── LOGIKA SKANOWANIA I OBSŁUGI KASY ───
   function ensureFocus() {
     const overlay = document.getElementById('help-overlay');
     if (!overlay.classList.contains('show')) {
@@ -326,21 +417,6 @@
 
   setInterval(ensureFocus, 300);
 
-  function toggleHelpModal(show) {
-    const overlay = document.getElementById('help-overlay');
-    if (show) {
-      overlay.classList.add('show');
-    } else {
-      overlay.classList.remove('show');
-      ensureFocus();
-    }
-  }
-
-  function handlePay() {
-    alert("Przejście do płatności");
-  }
-
-  // Obsługa skanowania / wpisywania kodów
   const barcodeInput = document.getElementById('barcode-input');
   barcodeInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
@@ -348,22 +424,34 @@
       const code = barcodeInput.value.trim();
       barcodeInput.value = '';
       if (code) {
-        addItem(code);
+        processBarcode(code);
       }
     }
   });
 
-  function addItem(code) {
-    const name = "Produkt " + code;
-    const price = (Math.random() * 20 + 1).toFixed(2) + " zł";
+  function processBarcode(code) {
+    let product = database.find(p => p.barcode === code);
+    
+    // Generowanie losowego produktu dla nieznanych kodów
+    if (!product) {
+      product = {
+        name: 'Produkt ' + code,
+        price: parseFloat((Math.random() * 15 + 1).toFixed(2))
+      };
+    }
 
-    // Aktualizacja lewego panelu (ostatnio zeskanowany)
-    document.getElementById('last-title').textContent = name;
-    document.getElementById('last-price').textContent = price;
+    addToCart(product);
+  }
 
-    // Dodanie do paragonu po prawej stronie
-    cart.push({ name, price });
+  function addToCart(p) {
+    cart.push(p);
+
+    // Wyświetlanie po lewej stronie
+    document.getElementById('last-title').textContent = p.name;
+    document.getElementById('last-price').textContent = p.price.toFixed(2) + ' zł';
+
     renderReceipt();
+    speak(p.name, 1000);
   }
 
   function renderReceipt() {
@@ -371,10 +459,33 @@
     container.innerHTML = cart.map(item => `
       <div class="receipt-row">
         <span class="name">${item.name}</span>
-        <span class="price">${item.price}</span>
+        <span class="price">${item.price.toFixed(2)} zł</span>
       </div>
     `).join('');
+
     container.scrollTop = container.scrollHeight;
+    document.getElementById('btn-pay').disabled = cart.length === 0;
+  }
+
+  function triggerHelp(e) {
+    if (e) e.stopPropagation();
+    initAudioAndFocus();
+    document.getElementById('help-overlay').classList.add('show');
+    speak('Poczekaj na pomoc', 450);
+  }
+
+  function closeHelp(e) {
+    if (e) e.stopPropagation();
+    document.getElementById('help-overlay').classList.remove('show');
+    ensureFocus();
+    speak('Obsługa wznowiona', 900);
+  }
+
+  function handlePay() {
+    if (cart.length === 0) return;
+    const total = cart.reduce((sum, item) => sum + item.price, 0).toFixed(2);
+    speak('Suma do zapłaty ' + total + ' zł. Wybierz płatność', 1100);
+    alert('Suma do zapłaty: ' + total + ' zł');
   }
 </script>
 </body>
